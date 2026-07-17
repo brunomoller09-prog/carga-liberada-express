@@ -384,6 +384,17 @@ function ComprovanteLogistico({ registro }: { registro: Registro }) {
   return (
     <div id="print-area" className="bg-white text-black">
       <table className="britania-doc w-full border-collapse text-[12px]">
+        <colgroup>
+          <col style={{ width: "14%" }} />
+          <col style={{ width: "10%" }} />
+          <col style={{ width: "10%" }} />
+          <col style={{ width: "12%" }} />
+          <col style={{ width: "10%" }} />
+          <col style={{ width: "10%" }} />
+          <col style={{ width: "10%" }} />
+          <col style={{ width: "12%" }} />
+          <col style={{ width: "12%" }} />
+        </colgroup>
         <tbody>
           {/* Cabeçalho */}
           <tr>
@@ -451,14 +462,30 @@ function ComprovanteLogistico({ registro }: { registro: Registro }) {
 
           {/* Conferente */}
           <tr>
-            <td colSpan={9}>
+            <td colSpan={6}>
               <strong>CONFERENTE:</strong> {registro.conferente}
+            </td>
+            <td
+              colSpan={3}
+              rowSpan={2}
+              className="align-middle text-center text-white"
+              style={{ background: "#000" }}
+            >
+              <div className="text-[10px] font-semibold uppercase tracking-widest opacity-80">
+                ID da Carga
+              </div>
+              <div className="mt-1 font-mono text-[14px] font-bold">
+                {registro.idCarga}
+              </div>
+              <div className="mt-2 text-[10px] opacity-80">
+                {registro.data} · {registro.hora}
+              </div>
             </td>
           </tr>
 
           {/* Placas */}
           <tr>
-            <td colSpan={9}>
+            <td colSpan={6}>
               <div><strong>PLACA CAVALO:</strong> {registro.placaCavalo || " "}</div>
               <div className="mt-2"><strong>PLACA BAÚ:</strong> {registro.placaBau || " "}</div>
             </td>
@@ -526,19 +553,20 @@ function ComprovanteLogistico({ registro }: { registro: Registro }) {
             </td>
           </tr>
 
-          {/* Rodapé de identificação (ID/Hora) */}
-          <tr>
-            <td colSpan={9} className="text-[10px] text-gray-600">
-              ID: {registro.idCarga} · Emitido em {registro.data} às {registro.hora}
-              {registro.observacoes ? ` · Obs.: ${registro.observacoes}` : ""}
-            </td>
-          </tr>
+          {registro.observacoes && (
+            <tr>
+              <td colSpan={9} className="text-[11px]">
+                <strong>Observações:</strong> {registro.observacoes}
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
 
       <style>{`
         .britania-doc, .britania-doc td { border: 1px solid #000; }
         .britania-doc td { padding: 6px 8px; vertical-align: top; }
+        .britania-doc table td { border: 1px solid #000; }
       `}</style>
     </div>
   );
