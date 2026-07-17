@@ -81,10 +81,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Sistema de liberação de carga da Expedição - Britânia Eletrodomésticos, Fábrica Joinville." },
       { name: "author", content: "Britânia Eletrodomésticos" },
       { property: "og:title", content: "Liberação de Carga - Expedição Fábrica Joinville" },
-      { property: "og:description", content: "Registro e emissão de comprovantes de movimentação logística." },
+      { property: "og:description", content: "Sistema de liberação de carga da Expedição - Britânia Eletrodomésticos, Fábrica Joinville." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Liberação de Carga - Expedição Fábrica Joinville" },
+      { name: "twitter:description", content: "Sistema de liberação de carga da Expedição - Britânia Eletrodomésticos, Fábrica Joinville." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e0d62a38-538c-466a-a16f-9ff7411d8926/id-preview-c0cfe125--2e5f6696-d243-43de-917c-cd810b3d9173.lovable.app-1784295897439.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e0d62a38-538c-466a-a16f-9ff7411d8926/id-preview-c0cfe125--2e5f6696-d243-43de-917c-cd810b3d9173.lovable.app-1784295897439.png" },
     ],
     links: [
       {
