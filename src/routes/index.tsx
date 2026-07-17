@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import britaniaLogo from "@/assets/britania-logo.jpg";
 
 export const Route = createFileRoute("/")({
   component: LiberacaoCarga,
@@ -381,63 +382,164 @@ function ComprovanteLogistico({ registro }: { registro: Registro }) {
   const lacres = [registro.lacre1, registro.lacre2, registro.lacre3].filter(Boolean);
 
   return (
-    <div id="print-area" className="rounded-lg border-2 border-primary bg-white text-[#333]">
-      <div className="bg-primary px-6 py-4 text-primary-foreground">
-        <p className="text-xs uppercase tracking-widest opacity-80">Britânia Eletrodomésticos - Expedição Fábrica Joinville</p>
-        <h2 className="text-xl font-bold">Comprovante de Movimentação Logística</h2>
-      </div>
-      <div className="grid grid-cols-2 gap-x-6 gap-y-3 p-6 text-sm">
-        <Info label="ID da Carga" value={registro.idCarga} />
-        <Info label="Status" value="Gerado" />
-        <Info label="Data" value={registro.data} />
-        <Info label="Hora" value={registro.hora} />
-        <Info label="Destino" value={registro.destino} />
-        <Info label="Paletes" value={registro.paletes || "-"} />
-        <div className="col-span-2"><Info label="Endereço" value={registro.endereco} /></div>
+    <div id="print-area" className="bg-white text-black">
+      <table className="britania-doc w-full border-collapse text-[12px]">
+        <tbody>
+          {/* Cabeçalho */}
+          <tr>
+            <td className="w-[22%] align-middle" rowSpan={1}>
+              <img src={britaniaLogo} alt="Britânia" className="mx-auto h-10 object-contain" />
+            </td>
+            <td colSpan={4} className="text-center align-middle">
+              <strong>Comprovante Movimentação Logística</strong>
+            </td>
+            <td colSpan={2}>
+              <div><strong>N.:</strong></div>
+              <div>LG-SC.FO.030</div>
+            </td>
+            <td>
+              <div><strong>Rev:</strong></div>
+              <div>4</div>
+            </td>
+            <td>
+              <div><strong>Data:</strong></div>
+              <div>{registro.data}</div>
+            </td>
+          </tr>
 
-        <div className="col-span-2 mt-2 border-t border-border pt-3">
-          <p className="mb-2 text-xs font-semibold uppercase text-primary">Notas Fiscais</p>
-          {notas.length === 0 ? (
-            <p className="text-sm text-muted-foreground">—</p>
-          ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">
-                  <th className="py-1">NF</th><th className="py-1">Série</th>
-                </tr>
-              </thead>
-              <tbody>
-                {notas.map((n, i) => (
-                  <tr key={i} className="border-b border-border/50"><td className="py-1">{n.nf}</td><td className="py-1">{n.serie}</td></tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+          {/* Destino / Paletes / NF-Série */}
+          <tr>
+            <td colSpan={3} className="align-top">
+              <div><strong>Destino:</strong> {registro.destino}</div>
+              <div className="mt-2"><strong>Endereço:</strong> {registro.endereco}</div>
+            </td>
+            <td className="text-center align-top">
+              <div><strong>Nº de Paletes</strong></div>
+              <div className="mt-2">{registro.paletes || "—"}</div>
+            </td>
+            <td colSpan={5} className="align-top p-0">
+              <div className="border-b border-black px-2 py-1"><strong>NOTA FISCAL – SÉRIE</strong></div>
+              <table className="w-full border-collapse">
+                <tbody>
+                  {[0, 1, 2].map((i) => {
+                    const n = notas[i];
+                    return (
+                      <tr key={i}>
+                        <td className="w-1/2 border-t border-black px-2 py-1">{n?.nf || "\u00A0"}</td>
+                        <td className="w-1/2 border-t border-l border-black px-2 py-1">{n?.serie || "\u00A0"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </td>
+          </tr>
 
-        <div className="col-span-2 border-t border-border pt-3">
-          <p className="mb-2 text-xs font-semibold uppercase text-primary">Lacres</p>
-          <p className="text-sm">{lacres.length ? lacres.join(" • ") : "—"}</p>
-        </div>
+          {/* Motorista + Transportadora + Lacre */}
+          <tr>
+            <td colSpan={6} className="align-top">
+              <div><strong>MOTORISTA:</strong> <u>{registro.motorista || " "}</u></div>
+              <div className="mt-2"><strong>TRANSPORTADORA:</strong> {registro.transportadora || " "}</div>
+            </td>
+            <td colSpan={3} className="align-top">
+              <div><strong>LACRE:</strong></div>
+              <div className="mt-1 whitespace-pre-line">
+                {lacres.length ? lacres.join("\n") : " "}
+              </div>
+            </td>
+          </tr>
 
-        <Info label="Motorista" value={registro.motorista || "-"} />
-        <Info label="Transportadora" value={registro.transportadora || "-"} />
-        <Info label="Placa Cavalo" value={registro.placaCavalo || "-"} />
-        <Info label="Placa Baú" value={registro.placaBau || "-"} />
-        <div className="col-span-2"><Info label="Conferente" value={registro.conferente} /></div>
-        {registro.observacoes && (
-          <div className="col-span-2"><Info label="Observações" value={registro.observacoes} /></div>
-        )}
+          {/* Conferente */}
+          <tr>
+            <td colSpan={9}>
+              <strong>CONFERENTE:</strong> {registro.conferente}
+            </td>
+          </tr>
 
-        <div className="col-span-2 mt-3 rounded-md border border-border bg-accent/30 p-3 text-xs text-muted-foreground">
-          <p className="mb-1 font-semibold text-primary">Orientações Gerais</p>
-          <ul className="list-inside list-disc space-y-0.5">
-            <li>Verifique os dados antes da operação.</li>
-            <li>Confirme destino, placas, lacres e notas fiscais.</li>
-            <li>Mantenha este comprovante salvo para consulta.</li>
-          </ul>
-        </div>
-      </div>
+          {/* Placas */}
+          <tr>
+            <td colSpan={9}>
+              <div><strong>PLACA CAVALO:</strong> {registro.placaCavalo || " "}</div>
+              <div className="mt-2"><strong>PLACA BAÚ:</strong> {registro.placaBau || " "}</div>
+            </td>
+          </tr>
+
+          {/* Cabeçalhos assinaturas 1 */}
+          <tr className="text-center font-bold">
+            <td colSpan={2}>CARIMBO CONFERENTE</td>
+            <td colSpan={4}>ASSINATURA MOTORISTA</td>
+            <td colSpan={3}>DATAs</td>
+          </tr>
+          <tr>
+            <td colSpan={2} className="h-24 align-bottom text-center text-[11px]">
+              <div className="mx-4 mb-1 border-b border-black"></div>
+              ASSINAR ESSE CAMPO AO LIBERAR A CARGA
+            </td>
+            <td colSpan={4} className="h-24 align-bottom text-center text-[11px]">
+              <div className="mx-4 mb-1 border-b border-black"></div>
+              ASSINAR ESSE CAMPO APÓS CONFERIR DESTINO
+            </td>
+            <td colSpan={3} className="align-top text-[11px]">
+              <div>&nbsp;</div>
+              <div>&nbsp;</div>
+            </td>
+          </tr>
+
+          {/* Cabeçalhos assinaturas 2 */}
+          <tr className="text-center font-bold">
+            <td colSpan={2}>CARIMBO PORTARIA</td>
+            <td colSpan={4}>ASSINATURA RECEBIMENTO</td>
+            <td colSpan={3}>CARIMBO CONTROLADORIA FÁBRICA</td>
+          </tr>
+          <tr>
+            <td colSpan={2} className="h-24 align-bottom text-center text-[11px]">
+              <div className="mx-4 mb-1 border-b border-black"></div>
+              ASSINAR ESSE CAMPO NA SAÍDA E ENTRADA DA PORTARIA
+            </td>
+            <td colSpan={4} className="h-24 align-bottom text-center text-[11px]">
+              <div className="mx-4 mb-1 border-b border-black"></div>
+              ASSINAR ESSE CAMPO NO RECEBIMENTO DA CARGA
+            </td>
+            <td colSpan={3} className="h-24 align-bottom text-center text-[11px]">
+              <div className="mx-4 mb-1 border-b border-black"></div>
+              ASSINAR ESSE CAMPO NA DEVOLUÇÃO DO CANHOTO
+            </td>
+          </tr>
+
+          {/* Orientações */}
+          <tr>
+            <td colSpan={9} className="bg-black text-center font-bold text-white">
+              ORIENTAÇÕES GERAIS
+            </td>
+          </tr>
+          <tr>
+            <td colSpan={9} className="text-[11px] leading-relaxed">
+              <div>* Motorista Verificar a Placa e o Destino da Carga antes de assinar no campo solicitado.</div>
+              <div>* Portaria Verificar se as NFs deste formulário estão grampeadas neste documento. (Não é descartado a conferência padrão dos lacres)</div>
+              <div>* Recebimento Confirmar o recebimento da Carga e das NFs contidas nesse documento.</div>
+              <div>* Controladoria Fábrica carimbar e assinar após o recebimento dos canhotos assinados confirmando entrega da Carga.</div>
+            </td>
+          </tr>
+          <tr>
+            <td colSpan={9} className="text-[11px] leading-relaxed">
+              * Liberação de carga mediante veículos contratados pelo cliente denominado como DESTINO - é dever do conferente solicitar assinatura do motorista nos canhotos e entregar na controladoria da fábrica
+            </td>
+          </tr>
+
+          {/* Rodapé de identificação (ID/Hora) */}
+          <tr>
+            <td colSpan={9} className="text-[10px] text-gray-600">
+              ID: {registro.idCarga} · Emitido em {registro.data} às {registro.hora}
+              {registro.observacoes ? ` · Obs.: ${registro.observacoes}` : ""}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <style>{`
+        .britania-doc, .britania-doc td { border: 1px solid #000; }
+        .britania-doc td { padding: 6px 8px; vertical-align: top; }
+      `}</style>
     </div>
   );
 }
