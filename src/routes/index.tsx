@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import britaniaLogo from "@/assets/britania-logo.jpg";
 
 export const Route = createFileRoute("/")({
   component: LiberacaoCarga,
