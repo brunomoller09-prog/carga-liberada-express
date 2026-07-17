@@ -14,7 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cargo_releases: {
+        Row: {
+          codigo_barras_1: string
+          codigo_barras_2: string | null
+          codigo_barras_3: string | null
+          conferente: string | null
+          created_at: string
+          data: string
+          destino: string
+          email: string | null
+          endereco: string
+          hora: string
+          id: string
+          id_carga: string
+          lacre_1: string | null
+          lacre_2: string | null
+          lacre_3: string | null
+          motorista: string | null
+          nf_1: string | null
+          nf_2: string | null
+          nf_3: string | null
+          observacoes: string | null
+          paletes: number | null
+          placa_bau: string | null
+          placa_cavalo: string | null
+          serie_1: string | null
+          serie_2: string | null
+          serie_3: string | null
+          status: string
+          transportadora: string | null
+        }
+        Insert: {
+          codigo_barras_1: string
+          codigo_barras_2?: string | null
+          codigo_barras_3?: string | null
+          conferente?: string | null
+          created_at?: string
+          data: string
+          destino: string
+          email?: string | null
+          endereco: string
+          hora: string
+          id?: string
+          id_carga: string
+          lacre_1?: string | null
+          lacre_2?: string | null
+          lacre_3?: string | null
+          motorista?: string | null
+          nf_1?: string | null
+          nf_2?: string | null
+          nf_3?: string | null
+          observacoes?: string | null
+          paletes?: number | null
+          placa_bau?: string | null
+          placa_cavalo?: string | null
+          serie_1?: string | null
+          serie_2?: string | null
+          serie_3?: string | null
+          status?: string
+          transportadora?: string | null
+        }
+        Update: {
+          codigo_barras_1?: string
+          codigo_barras_2?: string | null
+          codigo_barras_3?: string | null
+          conferente?: string | null
+          created_at?: string
+          data?: string
+          destino?: string
+          email?: string | null
+          endereco?: string
+          hora?: string
+          id?: string
+          id_carga?: string
+          lacre_1?: string | null
+          lacre_2?: string | null
+          lacre_3?: string | null
+          motorista?: string | null
+          nf_1?: string | null
+          nf_2?: string | null
+          nf_3?: string | null
+          observacoes?: string | null
+          paletes?: number | null
+          placa_bau?: string | null
+          placa_cavalo?: string | null
+          serie_1?: string | null
+          serie_2?: string | null
+          serie_3?: string | null
+          status?: string
+          transportadora?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
