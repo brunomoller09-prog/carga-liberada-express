@@ -142,3 +142,16 @@
     color: var(--color-foreground);
   }
 }
+
+/* Print styles: show only the release document */
+@media print {
+  body * { visibility: hidden !important; }
+  #print-area, #print-area * { visibility: visible !important; }
+  #print-area {
+    position: absolute !important;
+    left: 0; top: 0;
+    width: 100%;
+    padding: 24px;
+  }
+  .no-print { display: none !important; }
+}
