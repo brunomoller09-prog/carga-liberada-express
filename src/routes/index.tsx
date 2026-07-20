@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import britaniaLogo from "@/assets/britania-logo.jpg";
+import { ComprovanteLogistico, type ComprovanteData } from "@/components/ComprovanteLogistico";
 
 export const Route = createFileRoute("/")({
   component: LiberacaoCarga,
@@ -39,23 +39,7 @@ function gerarIdCarga(d: Date) {
   return `LG-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
 }
 
-type Registro = {
-  idCarga: string;
-  data: string;
-  hora: string;
-  destino: string;
-  endereco: string;
-  cb1: string; cb2: string; cb3: string;
-  nf1: string; serie1: string;
-  nf2: string; serie2: string;
-  nf3: string; serie3: string;
-  placaCavalo: string; placaBau: string;
-  motorista: string; transportadora: string;
-  conferente: string;
-  lacre1: string;
-  paletes: string;
-  observacoes: string;
-};
+type Registro = ComprovanteData;
 
 function LiberacaoCarga() {
   const [destino, setDestino] = useState("");
