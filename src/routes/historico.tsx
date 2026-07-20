@@ -117,10 +117,10 @@ function HistoricoPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtradas.map((r) => {
+                {filtradas.flatMap((r) => {
                   const isOpen = aberto === r.id;
-                  return (
-                    <>
+                  const rows = [
+                    (
                       <tr key={r.id} className="border-t border-border">
                         <td className="px-4 py-3 font-mono text-xs">{r.id_carga}</td>
                         <td className="px-4 py-3">{r.data} · {r.hora}</td>
@@ -136,8 +136,11 @@ function HistoricoPage() {
                           </button>
                         </td>
                       </tr>
-                      {isOpen && (
-                        <tr key={r.id + "-d"} className="border-t border-border bg-muted/30">
+                    ),
+                  ];
+                  if (isOpen) {
+                    rows.push(
+                      <tr key={r.id + "-d"} className="border-t border-border bg-muted/30">
                           <td colSpan={6} className="px-4 py-4 text-xs">
                             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                               <Detail label="Endereço" value={r.endereco} />
@@ -157,10 +160,10 @@ function HistoricoPage() {
                               )}
                             </div>
                           </td>
-                        </tr>
-                      )}
-                    </>
-                  );
+                      </tr>,
+                    );
+                  }
+                  return rows;
                 })}
               </tbody>
             </table>
