@@ -349,7 +349,7 @@ function ComprovanteLogistico({ registro }: { registro: Registro }) {
     { nf: registro.nf2, serie: registro.serie2 },
     { nf: registro.nf3, serie: registro.serie3 },
   ].filter((n) => n.nf);
-  const lacres = [registro.lacre1, registro.lacre2, registro.lacre3].filter(Boolean);
+  const lacres = [registro.lacre1].filter(Boolean);
 
   return (
     <div id="print-area" className="bg-white text-black">
