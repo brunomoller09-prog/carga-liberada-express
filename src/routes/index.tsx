@@ -140,7 +140,6 @@ function LiberacaoCarga() {
     setRegistro({
       idCarga, data: dataFmt, hora: horaFmt,
       destino, endereco,
-      cb1, cb2, cb3,
       nf1: nf1.nf, serie1: nf1.serie,
       nf2: cb2 ? nf2.nf : "", serie2: cb2 ? nf2.serie : "",
       nf3: cb3 ? nf3.nf : "", serie3: cb3 ? nf3.serie : "",
