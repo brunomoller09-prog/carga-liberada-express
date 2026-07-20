@@ -447,9 +447,6 @@ function ComprovanteLogistico({ registro }: { registro: Registro }) {
               <div className="mt-1 font-mono text-[14px] font-bold">
                 {registro.idCarga}
               </div>
-              <div className="mt-2 text-[10px] opacity-80">
-                {registro.data} · {registro.hora}
-              </div>
             </td>
           </tr>
 
@@ -477,8 +474,8 @@ function ComprovanteLogistico({ registro }: { registro: Registro }) {
               ASSINAR ESSE CAMPO APÓS CONFERIR DESTINO
             </td>
             <td colSpan={3} className="align-top text-[11px]">
-              <div>&nbsp;</div>
-              <div>&nbsp;</div>
+              <div className="px-2 py-1"><strong>Data:</strong> {registro.data}</div>
+              <div className="px-2 py-1"><strong>Hora:</strong> {registro.hora}</div>
             </td>
           </tr>
 
