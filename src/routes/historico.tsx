@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ComprovanteLogistico, type ComprovanteData } from "@/components/ComprovanteLogistico";
 
 export const Route = createFileRoute("/historico")({
   component: HistoricoPage,
@@ -43,6 +44,34 @@ function HistoricoPage() {
   const [erro, setErro] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [aberto, setAberto] = useState<string | null>(null);
+  const [imprimir, setImprimir] = useState<ComprovanteData | null>(null);
+
+  function toComprovante(r: Row): ComprovanteData {
+    return {
+      idCarga: r.id_carga,
+      data: r.data,
+      hora: r.hora,
+      destino: r.destino,
+      endereco: r.endereco,
+      nf1: r.nf_1 || "", serie1: r.serie_1 || "",
+      nf2: r.nf_2 || "", serie2: r.serie_2 || "",
+      nf3: r.nf_3 || "", serie3: r.serie_3 || "",
+      placaCavalo: r.placa_cavalo || "", placaBau: r.placa_bau || "",
+      motorista: r.motorista || "", transportadora: r.transportadora || "",
+      conferente: r.conferente || "",
+      lacre1: r.lacre_1 || "",
+      paletes: r.paletes?.toString() || "",
+      observacoes: r.observacoes || "",
+    };
+  }
+
+  function handleImprimir(r: Row) {
+    setImprimir(toComprovante(r));
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => setImprimir(null), 300);
+    }, 100);
+  }
 
   useEffect(() => {
     (async () => {
@@ -68,7 +97,8 @@ function HistoricoPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="bg-primary text-primary-foreground shadow-md">
+      {imprimir && <ComprovanteLogistico registro={imprimir} />}
+      <header className="no-print bg-primary text-primary-foreground shadow-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-5">
           <div>
             <p className="text-xs uppercase tracking-widest opacity-80">Britânia Eletrodomésticos</p>
@@ -83,7 +113,7 @@ function HistoricoPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="no-print mx-auto max-w-5xl px-6 py-8">
         <div className="mb-4">
           <input
             value={busca}
@@ -128,6 +158,12 @@ function HistoricoPage() {
                         <td className="px-4 py-3">{r.motorista || "—"}</td>
                         <td className="px-4 py-3">{r.placa_cavalo || "—"}</td>
                         <td className="px-4 py-3 text-right">
+                          <button
+                            onClick={() => handleImprimir(r)}
+                            className="mr-3 text-xs font-semibold text-primary hover:underline"
+                          >
+                            Imprimir
+                          </button>
                           <button
                             onClick={() => setAberto(isOpen ? null : r.id)}
                             className="text-xs font-semibold text-primary hover:underline"
