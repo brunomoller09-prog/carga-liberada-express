@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import britaniaLogo from "@/assets/britania-logo.jpg";
 
@@ -51,9 +52,8 @@ type Registro = {
   placaCavalo: string; placaBau: string;
   motorista: string; transportadora: string;
   conferente: string;
-  lacre1: string; lacre2: string; lacre3: string;
+  lacre1: string;
   paletes: string;
-  email: string;
   observacoes: string;
 };
 
@@ -69,11 +69,7 @@ function LiberacaoCarga() {
   const [transportadora, setTransportadora] = useState("");
   const [paletes, setPaletes] = useState("");
   const [lacre1, setLacre1] = useState("");
-  const [maisLacres, setMaisLacres] = useState(false);
-  const [lacre2, setLacre2] = useState("");
-  const [lacre3, setLacre3] = useState("");
   const [conferente, setConferente] = useState("");
-  const [email, setEmail] = useState("");
   const [observacoes, setObservacoes] = useState("");
 
   const [saving, setSaving] = useState(false);
@@ -102,8 +98,8 @@ function LiberacaoCarga() {
     setPlacaCavalo(""); setPlacaBau("");
     setMotorista(""); setTransportadora("");
     setPaletes("");
-    setLacre1(""); setMaisLacres(false); setLacre2(""); setLacre3("");
-    setConferente(""); setEmail(""); setObservacoes("");
+    setLacre1("");
+    setConferente(""); setObservacoes("");
     setErro(null); setRegistro(null);
   }
 
@@ -111,7 +107,7 @@ function LiberacaoCarga() {
     e.preventDefault();
     setErro(null);
 
-    if (!destino || !endereco || !cb1 || !conferente || !email) {
+    if (!destino || !endereco || !cb1 || !conferente) {
       setErro("⚠️ Verifique os campos obrigatórios antes de finalizar.");
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
@@ -141,10 +137,10 @@ function LiberacaoCarga() {
       transportadora: transportadora || null,
       conferente,
       lacre_1: lacre1 || null,
-      lacre_2: maisLacres ? lacre2 || null : null,
-      lacre_3: maisLacres ? lacre3 || null : null,
+      lacre_2: null,
+      lacre_3: null,
       paletes: paletes ? Number(paletes) : null,
-      email,
+      email: null,
       status: "Gerado",
       observacoes: observacoes || null,
     };
@@ -166,34 +162,27 @@ function LiberacaoCarga() {
       nf3: cb3 ? nf3.nf : "", serie3: cb3 ? nf3.serie : "",
       placaCavalo, placaBau, motorista, transportadora,
       conferente,
-      lacre1, lacre2: maisLacres ? lacre2 : "", lacre3: maisLacres ? lacre3 : "",
-      paletes, email, observacoes,
+      lacre1,
+      paletes, observacoes,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  function abrirEmail() {
-    if (!registro) return;
-    const subject = encodeURIComponent(`Liberação de Carga ${registro.idCarga} - ${registro.destino}`);
-    const body = encodeURIComponent(
-      `Olá,\n\nSua liberação de carga foi gerada com sucesso.\n\n` +
-      `ID da Carga: ${registro.idCarga}\nData: ${registro.data}  Hora: ${registro.hora}\n` +
-      `Destino: ${registro.destino}\nEndereço: ${registro.endereco}\n` +
-      `Motorista: ${registro.motorista}\nPlaca Cavalo: ${registro.placaCavalo}  Placa Baú: ${registro.placaBau}\n` +
-      `Conferente: ${registro.conferente}\n\n` +
-      `Orientações importantes:\n- Verifique os dados antes da operação.\n- Confirme destino, placas, lacres e notas fiscais.\n- Mantenha este comprovante salvo para consulta.\n\n` +
-      `Atenciosamente,\nExpedição Fábrica Joinville\nBritânia Eletrodomésticos`
-    );
-    window.location.href = `mailto:${registro.email}?subject=${subject}&body=${body}`;
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Cabeçalho */}
       <header className="no-print bg-primary text-primary-foreground shadow-md">
-        <div className="mx-auto max-w-5xl px-6 py-5">
-          <p className="text-xs uppercase tracking-widest opacity-80">Britânia Eletrodomésticos</p>
-          <h1 className="text-2xl font-bold">Liberação de Carga — Expedição Fábrica Joinville</h1>
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-5">
+          <div>
+            <p className="text-xs uppercase tracking-widest opacity-80">Britânia Eletrodomésticos</p>
+            <h1 className="text-2xl font-bold">Liberação de Carga — Expedição Fábrica Joinville</h1>
+          </div>
+          <Link
+            to="/historico"
+            className="rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20"
+          >
+            Histórico
+          </Link>
         </div>
       </header>
 
@@ -207,7 +196,7 @@ function LiberacaoCarga() {
         {registro && (
           <div className="no-print mb-6 rounded-md border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
             ✅ Liberação de carga registrada com sucesso!<br />
-            O documento foi gerado e pode ser impresso ou enviado para <strong>{registro.email}</strong>.
+            O documento foi gerado e pode ser impresso ou salvo em PDF.
           </div>
         )}
 
@@ -222,12 +211,6 @@ function LiberacaoCarga() {
               className="rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow hover:opacity-90"
             >
               Imprimir / Salvar PDF
-            </button>
-            <button
-              onClick={abrirEmail}
-              className="rounded-md border border-primary bg-white px-5 py-2.5 text-sm font-semibold text-primary hover:bg-accent"
-            >
-              Enviar por E-mail
             </button>
             <button
               onClick={limpar}
@@ -300,24 +283,11 @@ function LiberacaoCarga() {
               <Field label="Quantidade de Paletes">
                 <input type="number" min={0} value={paletes} onChange={(e) => setPaletes(e.target.value)} className="input" />
               </Field>
-              <Field label="Lacre 1"><input value={lacre1} onChange={(e) => setLacre1(e.target.value)} className="input" /></Field>
-              <Field label="Possui mais de um lacre?" full>
-                <label className="inline-flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={maisLacres} onChange={(e) => setMaisLacres(e.target.checked)} />
-                  Sim, adicionar Lacre 2 e Lacre 3
-                </label>
-              </Field>
-              {maisLacres && (
-                <>
-                  <Field label="Lacre 2"><input value={lacre2} onChange={(e) => setLacre2(e.target.value)} className="input" /></Field>
-                  <Field label="Lacre 3"><input value={lacre3} onChange={(e) => setLacre3(e.target.value)} className="input" /></Field>
-                </>
-              )}
+              <Field label="Lacre"><input value={lacre1} onChange={(e) => setLacre1(e.target.value)} className="input" /></Field>
             </Section>
 
             <Section titulo="5. Conferência">
               <Field label="Conferente *"><input value={conferente} onChange={(e) => setConferente(e.target.value)} className="input" required /></Field>
-              <Field label="E-mail para envio *"><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input" required /></Field>
               <Field label="Observações" full>
                 <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} className="input min-h-[80px]" />
               </Field>
