@@ -134,12 +134,12 @@ export function ComprovanteLogistico({ registro }: { registro: ComprovanteData }
           </tr>
           <tr>
             <td colSpan={2} className="h-24 align-top text-center text-[11px]">
-              <div>ASSINAR ESSE CAMPO AO LIBERAR A CARGA</div>
               <div className="mx-4 mt-10 border-b border-black"></div>
+              <div className="mt-2">ASSINAR ESSE CAMPO AO LIBERAR A CARGA</div>
             </td>
             <td colSpan={4} className="h-24 align-top text-center text-[11px]">
-              <div>ASSINAR ESSE CAMPO APÓS CONFERIR DESTINO</div>
               <div className="mx-4 mt-10 border-b border-black"></div>
+              <div className="mt-2">ASSINAR ESSE CAMPO APÓS CONFERIR DESTINO</div>
             </td>
             <td colSpan={3} className="align-top text-[11px]">
               <div className="px-2 py-1"><strong>Data:</strong> {registro.data}</div>
@@ -154,16 +154,16 @@ export function ComprovanteLogistico({ registro }: { registro: ComprovanteData }
           </tr>
           <tr>
             <td colSpan={2} className="h-24 align-top text-center text-[11px]">
-              <div>ASSINAR ESSE CAMPO NA SAÍDA E ENTRADA DA PORTARIA</div>
               <div className="mx-4 mt-10 border-b border-black"></div>
+              <div className="mt-2">ASSINAR ESSE CAMPO NA SAÍDA E ENTRADA DA PORTARIA</div>
             </td>
             <td colSpan={4} className="h-24 align-top text-center text-[11px]">
-              <div>ASSINAR ESSE CAMPO NO RECEBIMENTO DA CARGA</div>
               <div className="mx-4 mt-10 border-b border-black"></div>
+              <div className="mt-2">ASSINAR ESSE CAMPO NO RECEBIMENTO DA CARGA</div>
             </td>
             <td colSpan={3} className="h-24 align-top text-center text-[11px]">
-              <div>ASSINAR ESSE CAMPO NA DEVOLUÇÃO DO CANHOTO</div>
               <div className="mx-4 mt-10 border-b border-black"></div>
+              <div className="mt-2">ASSINAR ESSE CAMPO NA DEVOLUÇÃO DO CANHOTO</div>
             </td>
           </tr>
 
