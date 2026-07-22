@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { ComprovanteLogistico, type ComprovanteData } from "@/components/ComprovanteLogistico";
+import logoAsset from "@/assets/logo-liberacao-carga.png.asset.json";
 
 export const Route = createFileRoute("/")({
   component: LiberacaoCarga,
