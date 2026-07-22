@@ -133,12 +133,12 @@ export function ComprovanteLogistico({ registro }: { registro: ComprovanteData }
             <td colSpan={3}>DATAs</td>
           </tr>
           <tr>
-            <td colSpan={2} className="h-24 align-top text-center text-[11px]">
-              <div className="mx-4 mt-10 border-b border-black"></div>
+            <td colSpan={2} className="h-32 align-top text-center text-[11px]">
+              <div className="mx-4 mt-14 border-b border-black"></div>
               <div className="mt-2">ASSINAR ESSE CAMPO AO LIBERAR A CARGA</div>
             </td>
-            <td colSpan={4} className="h-24 align-top text-center text-[11px]">
-              <div className="mx-4 mt-10 border-b border-black"></div>
+            <td colSpan={4} className="h-32 align-top text-center text-[11px]">
+              <div className="mx-4 mt-14 border-b border-black"></div>
               <div className="mt-2">ASSINAR ESSE CAMPO APÓS CONFERIR DESTINO</div>
             </td>
             <td colSpan={3} className="align-top text-[11px]">
@@ -153,16 +153,16 @@ export function ComprovanteLogistico({ registro }: { registro: ComprovanteData }
             <td colSpan={3}>CARIMBO CONTROLADORIA FÁBRICA</td>
           </tr>
           <tr>
-            <td colSpan={2} className="h-24 align-top text-center text-[11px]">
-              <div className="mx-4 mt-10 border-b border-black"></div>
+            <td colSpan={2} className="h-32 align-top text-center text-[11px]">
+              <div className="mx-4 mt-14 border-b border-black"></div>
               <div className="mt-2">ASSINAR ESSE CAMPO NA SAÍDA E ENTRADA DA PORTARIA</div>
             </td>
-            <td colSpan={4} className="h-24 align-top text-center text-[11px]">
-              <div className="mx-4 mt-10 border-b border-black"></div>
+            <td colSpan={4} className="h-32 align-top text-center text-[11px]">
+              <div className="mx-4 mt-14 border-b border-black"></div>
               <div className="mt-2">ASSINAR ESSE CAMPO NO RECEBIMENTO DA CARGA</div>
             </td>
-            <td colSpan={3} className="h-24 align-top text-center text-[11px]">
-              <div className="mx-4 mt-10 border-b border-black"></div>
+            <td colSpan={3} className="h-32 align-top text-center text-[11px]">
+              <div className="mx-4 mt-14 border-b border-black"></div>
               <div className="mt-2">ASSINAR ESSE CAMPO NA DEVOLUÇÃO DO CANHOTO</div>
             </td>
           </tr>
