@@ -57,7 +57,7 @@ export function ComprovanteLogistico({ registro }: { registro: ComprovanteData }
             </td>
             <td>
               <div><strong>Data:</strong></div>
-              <div>{registro.data}</div>
+              <div>26/01/2023</div>
             </td>
           </tr>
 
