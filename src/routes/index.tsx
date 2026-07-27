@@ -354,44 +354,20 @@ function LiberacaoCarga() {
             </Section>
 
             <Section titulo="2. Notas Fiscais">
-              <Field label="Código de Barras 1 * (44 dígitos)" full>
-                <input
-                  value={cb1}
-                  onChange={(e) => setCb1(onlyDigits(e.target.value))}
-                  className="input font-mono"
-                  inputMode="numeric"
-                  pattern="\d{44}"
-                  maxLength={44}
-                  autoFocus
-                  required
-                  placeholder="Escaneie ou digite os 44 dígitos"
-                />
+              <Field label="Código de Barras 1 * (somente scanner)" full>
+                <BarcodeScanInput value={cb1} onChange={(v) => setCb1(onlyDigits(v))} required autoFocus />
               </Field>
               <Field label="NF 1"><input value={nf1.nf} readOnly className="input bg-muted" /></Field>
               <Field label="Série 1"><input value={nf1.serie} readOnly className="input bg-muted" /></Field>
 
-              <Field label="Código de Barras 2 (opcional)" full>
-                <input
-                  value={cb2}
-                  onChange={(e) => setCb2(onlyDigits(e.target.value))}
-                  className="input font-mono"
-                  inputMode="numeric"
-                  maxLength={44}
-                  placeholder="44 dígitos"
-                />
+              <Field label="Código de Barras 2 (somente scanner)" full>
+                <BarcodeScanInput value={cb2} onChange={(v) => setCb2(onlyDigits(v))} />
               </Field>
               <Field label="NF 2"><input value={cb2 ? nf2.nf : ""} readOnly className="input bg-muted" /></Field>
               <Field label="Série 2"><input value={cb2 ? nf2.serie : ""} readOnly className="input bg-muted" /></Field>
 
-              <Field label="Código de Barras 3 (opcional)" full>
-                <input
-                  value={cb3}
-                  onChange={(e) => setCb3(onlyDigits(e.target.value))}
-                  className="input font-mono"
-                  inputMode="numeric"
-                  maxLength={44}
-                  placeholder="44 dígitos"
-                />
+              <Field label="Código de Barras 3 (somente scanner)" full>
+                <BarcodeScanInput value={cb3} onChange={(v) => setCb3(onlyDigits(v))} />
               </Field>
               <Field label="NF 3"><input value={cb3 ? nf3.nf : ""} readOnly className="input bg-muted" /></Field>
               <Field label="Série 3"><input value={cb3 ? nf3.serie : ""} readOnly className="input bg-muted" /></Field>
