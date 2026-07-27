@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ComprovanteLogistico, type ComprovanteData } from "@/components/ComprovanteLogistico";
-import logoAsset from "@/assets/logo-liberacao-carga-borda.png.asset.json";
+import logoAsset from "@/assets/logo-liberacao-carga.png.asset.json";
 
 export const Route = createFileRoute("/historico")({
   component: HistoricoPage,
