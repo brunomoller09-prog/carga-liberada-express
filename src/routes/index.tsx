@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { ComprovanteLogistico, type ComprovanteData } from "@/components/ComprovanteLogistico";
@@ -49,6 +49,98 @@ function formatarPlaca(v: string) {
 
 function onlyDigits(v: string) {
   return (v || "").replace(/\D/g, "").slice(0, 44);
+}
+
+// Campo que aceita SOMENTE entrada de leitor de código de barras.
+// Digitação manual é bloqueada. Detecção por velocidade de teclas (< 50ms entre teclas).
+function BarcodeScanInput({
+  value,
+  onChange,
+  required,
+  autoFocus,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  required?: boolean;
+  autoFocus?: boolean;
+  placeholder?: string;
+}) {
+  const lastKeyAt = useRef<number>(0);
+  const bufferRef = useRef<string>("");
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Permite navegação/edição básica
+    if (e.key === "Tab") return;
+    e.preventDefault();
+
+    const now = performance.now();
+    const gap = now - lastKeyAt.current;
+    lastKeyAt.current = now;
+
+    // Backspace só se for o próprio scanner (raro) — ignoramos
+    if (e.key === "Backspace") {
+      bufferRef.current = "";
+      onChange("");
+      return;
+    }
+
+    if (e.key === "Enter") {
+      // Finaliza leitura
+      return;
+    }
+
+    // Só aceita dígitos
+    if (!/^[0-9]$/.test(e.key)) return;
+
+    // Se demorou muito desde a última tecla, é digitação humana → reinicia
+    if (gap > 50 && bufferRef.current.length > 0) {
+      bufferRef.current = "";
+    }
+
+    bufferRef.current = (bufferRef.current + e.key).slice(0, 44);
+    onChange(bufferRef.current);
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    // Bloqueia colar também
+    e.preventDefault();
+  };
+
+  const clear = () => {
+    bufferRef.current = "";
+    onChange("");
+  };
+
+  return (
+    <div className="flex gap-2">
+      <input
+        value={value}
+        onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
+        onChange={() => { /* controlado só pelo scanner */ }}
+        onDrop={(e) => e.preventDefault()}
+        onContextMenu={(e) => e.preventDefault()}
+        className="input font-mono flex-1"
+        inputMode="none"
+        autoComplete="off"
+        autoFocus={autoFocus}
+        required={required}
+        placeholder={placeholder ?? "Escaneie o código de barras (digitação bloqueada)"}
+        title="Este campo aceita apenas leitura por scanner de código de barras"
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={clear}
+          className="px-3 py-1 text-xs rounded border border-border hover:bg-muted"
+          title="Limpar"
+        >
+          Limpar
+        </button>
+      )}
+    </div>
+  );
 }
 
 type Registro = ComprovanteData;
@@ -262,44 +354,20 @@ function LiberacaoCarga() {
             </Section>
 
             <Section titulo="2. Notas Fiscais">
-              <Field label="Código de Barras 1 * (44 dígitos)" full>
-                <input
-                  value={cb1}
-                  onChange={(e) => setCb1(onlyDigits(e.target.value))}
-                  className="input font-mono"
-                  inputMode="numeric"
-                  pattern="\d{44}"
-                  maxLength={44}
-                  autoFocus
-                  required
-                  placeholder="Escaneie ou digite os 44 dígitos"
-                />
+              <Field label="Código de Barras 1 * (somente scanner)" full>
+                <BarcodeScanInput value={cb1} onChange={(v) => setCb1(onlyDigits(v))} required autoFocus />
               </Field>
               <Field label="NF 1"><input value={nf1.nf} readOnly className="input bg-muted" /></Field>
               <Field label="Série 1"><input value={nf1.serie} readOnly className="input bg-muted" /></Field>
 
-              <Field label="Código de Barras 2 (opcional)" full>
-                <input
-                  value={cb2}
-                  onChange={(e) => setCb2(onlyDigits(e.target.value))}
-                  className="input font-mono"
-                  inputMode="numeric"
-                  maxLength={44}
-                  placeholder="44 dígitos"
-                />
+              <Field label="Código de Barras 2 (somente scanner)" full>
+                <BarcodeScanInput value={cb2} onChange={(v) => setCb2(onlyDigits(v))} />
               </Field>
               <Field label="NF 2"><input value={cb2 ? nf2.nf : ""} readOnly className="input bg-muted" /></Field>
               <Field label="Série 2"><input value={cb2 ? nf2.serie : ""} readOnly className="input bg-muted" /></Field>
 
-              <Field label="Código de Barras 3 (opcional)" full>
-                <input
-                  value={cb3}
-                  onChange={(e) => setCb3(onlyDigits(e.target.value))}
-                  className="input font-mono"
-                  inputMode="numeric"
-                  maxLength={44}
-                  placeholder="44 dígitos"
-                />
+              <Field label="Código de Barras 3 (somente scanner)" full>
+                <BarcodeScanInput value={cb3} onChange={(v) => setCb3(onlyDigits(v))} />
               </Field>
               <Field label="NF 3"><input value={cb3 ? nf3.nf : ""} readOnly className="input bg-muted" /></Field>
               <Field label="Série 3"><input value={cb3 ? nf3.serie : ""} readOnly className="input bg-muted" /></Field>
