@@ -40,6 +40,17 @@ function gerarIdCarga(d: Date) {
   return `LG-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
 }
 
+function formatarPlaca(v: string) {
+  // Aceita formato antigo (ABC-1234) e Mercosul (ABC1D23). Mantém apenas letras/números, máx 7.
+  const clean = (v || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7);
+  if (clean.length <= 3) return clean;
+  return `${clean.slice(0, 3)}-${clean.slice(3)}`;
+}
+
+function onlyDigits(v: string) {
+  return (v || "").replace(/\D/g, "").slice(0, 44);
+}
+
 type Registro = ComprovanteData;
 
 function LiberacaoCarga() {
@@ -94,6 +105,13 @@ function LiberacaoCarga() {
 
     if (!destino || !endereco || !cb1 || !conferente) {
       setErro("⚠️ Verifique os campos obrigatórios antes de finalizar.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    const invalido = [cb1, cb2, cb3].some((c) => c && c.replace(/\D/g, "").length !== 44);
+    if (invalido) {
+      setErro("⚠️ Cada código de barras deve conter exatamente 44 dígitos.");
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
@@ -245,27 +263,67 @@ function LiberacaoCarga() {
 
             <Section titulo="2. Notas Fiscais">
               <Field label="Código de Barras 1 * (44 dígitos)" full>
-                <input value={cb1} onChange={(e) => setCb1(e.target.value)} className="input font-mono" required />
+                <input
+                  value={cb1}
+                  onChange={(e) => setCb1(onlyDigits(e.target.value))}
+                  className="input font-mono"
+                  inputMode="numeric"
+                  pattern="\d{44}"
+                  maxLength={44}
+                  autoFocus
+                  required
+                  placeholder="Escaneie ou digite os 44 dígitos"
+                />
               </Field>
               <Field label="NF 1"><input value={nf1.nf} readOnly className="input bg-muted" /></Field>
               <Field label="Série 1"><input value={nf1.serie} readOnly className="input bg-muted" /></Field>
 
               <Field label="Código de Barras 2 (opcional)" full>
-                <input value={cb2} onChange={(e) => setCb2(e.target.value)} className="input font-mono" />
+                <input
+                  value={cb2}
+                  onChange={(e) => setCb2(onlyDigits(e.target.value))}
+                  className="input font-mono"
+                  inputMode="numeric"
+                  maxLength={44}
+                  placeholder="44 dígitos"
+                />
               </Field>
               <Field label="NF 2"><input value={cb2 ? nf2.nf : ""} readOnly className="input bg-muted" /></Field>
               <Field label="Série 2"><input value={cb2 ? nf2.serie : ""} readOnly className="input bg-muted" /></Field>
 
               <Field label="Código de Barras 3 (opcional)" full>
-                <input value={cb3} onChange={(e) => setCb3(e.target.value)} className="input font-mono" />
+                <input
+                  value={cb3}
+                  onChange={(e) => setCb3(onlyDigits(e.target.value))}
+                  className="input font-mono"
+                  inputMode="numeric"
+                  maxLength={44}
+                  placeholder="44 dígitos"
+                />
               </Field>
               <Field label="NF 3"><input value={cb3 ? nf3.nf : ""} readOnly className="input bg-muted" /></Field>
               <Field label="Série 3"><input value={cb3 ? nf3.serie : ""} readOnly className="input bg-muted" /></Field>
             </Section>
 
             <Section titulo="3. Dados do Veículo">
-              <Field label="Placa Cavalo"><input value={placaCavalo} onChange={(e) => setPlacaCavalo(e.target.value.toUpperCase())} className="input uppercase" /></Field>
-              <Field label="Placa Baú"><input value={placaBau} onChange={(e) => setPlacaBau(e.target.value.toUpperCase())} className="input uppercase" /></Field>
+              <Field label="Placa Cavalo">
+                <input
+                  value={placaCavalo}
+                  onChange={(e) => setPlacaCavalo(formatarPlaca(e.target.value))}
+                  className="input uppercase font-mono"
+                  maxLength={8}
+                  placeholder="ABC-1D23"
+                />
+              </Field>
+              <Field label="Placa Baú">
+                <input
+                  value={placaBau}
+                  onChange={(e) => setPlacaBau(formatarPlaca(e.target.value))}
+                  className="input uppercase font-mono"
+                  maxLength={8}
+                  placeholder="ABC-1D23"
+                />
+              </Field>
               <Field label="Motorista"><input value={motorista} onChange={(e) => setMotorista(e.target.value)} className="input" /></Field>
               <Field label="Transportadora"><input value={transportadora} onChange={(e) => setTransportadora(e.target.value)} className="input" /></Field>
             </Section>
