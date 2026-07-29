@@ -1,10 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ComprovanteLogistico, type ComprovanteData } from "@/components/ComprovanteLogistico";
 import logoAsset from "@/assets/logo-liberacao-carga.png.asset.json";
+import { isHistoricoUnlocked, lockHistorico } from "@/lib/gate.functions";
 
 export const Route = createFileRoute("/historico")({
+  beforeLoad: async () => {
+    const { unlocked } = await isHistoricoUnlocked();
+    if (!unlocked) throw redirect({ to: "/historico-senha" });
+  },
   component: HistoricoPage,
   errorComponent: ({ error }) => (
     <div role="alert" className="p-6 text-sm text-destructive">
@@ -40,6 +45,7 @@ type Row = {
 };
 
 function HistoricoPage() {
+  const router = useRouter();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -112,12 +118,23 @@ function HistoricoPage() {
               <h1 className="text-2xl font-bold">Histórico de Liberações</h1>
             </div>
           </div>
-          <Link
-            to="/"
-            className="rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20"
-          >
-            Nova Liberação
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/"
+              className="rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20"
+            >
+              Nova Liberação
+            </Link>
+            <button
+              onClick={async () => {
+                await lockHistorico();
+                await router.navigate({ to: "/historico-senha" });
+              }}
+              className="rounded-md border border-primary-foreground/30 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20"
+            >
+              Sair
+            </button>
+          </div>
         </div>
       </header>
 
