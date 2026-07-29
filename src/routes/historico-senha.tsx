@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { unlockHistorico } from "@/lib/gate.functions";
@@ -59,6 +59,14 @@ function SenhaPage() {
             {enviando ? "Verificando..." : "Entrar"}
           </button>
         </form>
+        <div className="mt-4 text-center">
+          <Link
+            to="/"
+            className="text-sm font-semibold text-primary hover:underline"
+          >
+            ← Voltar
+          </Link>
+        </div>
       </div>
     </div>
   );
