@@ -89,12 +89,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: "Sistema de liberação de carga da Expedição - Britânia Eletrodomésticos, Fábrica Joinville." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e0d62a38-538c-466a-a16f-9ff7411d8926/id-preview-c0cfe125--2e5f6696-d243-43de-917c-cd810b3d9173.lovable.app-1784295897439.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e0d62a38-538c-466a-a16f-9ff7411d8926/id-preview-c0cfe125--2e5f6696-d243-43de-917c-cd810b3d9173.lovable.app-1784295897439.png" },
+      { name: "theme-color", content: "#003B73" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Liberação" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "icon", type: "image/x-icon", href: "/favicon.ico", sizes: "any" },
       { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png" },
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
