@@ -278,12 +278,20 @@ function LiberacaoCarga() {
               <h1 className="text-2xl font-bold">Liberação de Carga — Expedição Fábrica Joinville</h1>
             </div>
           </div>
-          <Link
-            to="/historico"
-            className="rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20"
-          >
-            Histórico
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/instalar"
+              className="rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20"
+            >
+              Instalar app
+            </Link>
+            <Link
+              to="/historico"
+              className="rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20"
+            >
+              Histórico
+            </Link>
+          </div>
         </div>
       </header>
 

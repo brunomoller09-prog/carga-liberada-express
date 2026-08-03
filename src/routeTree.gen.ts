@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as InstalarRouteImport } from './routes/instalar'
 import { Route as HistoricoSenhaRouteImport } from './routes/historico-senha'
 import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as IndexRouteImport } from './routes/index'
 
+const InstalarRoute = InstalarRouteImport.update({
+  id: '/instalar',
+  path: '/instalar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HistoricoSenhaRoute = HistoricoSenhaRouteImport.update({
   id: '/historico-senha',
   path: '/historico-senha',
@@ -33,34 +39,45 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/historico': typeof HistoricoRoute
   '/historico-senha': typeof HistoricoSenhaRoute
+  '/instalar': typeof InstalarRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/historico': typeof HistoricoRoute
   '/historico-senha': typeof HistoricoSenhaRoute
+  '/instalar': typeof InstalarRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/historico': typeof HistoricoRoute
   '/historico-senha': typeof HistoricoSenhaRoute
+  '/instalar': typeof InstalarRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/historico' | '/historico-senha'
+  fullPaths: '/' | '/historico' | '/historico-senha' | '/instalar'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/historico' | '/historico-senha'
-  id: '__root__' | '/' | '/historico' | '/historico-senha'
+  to: '/' | '/historico' | '/historico-senha' | '/instalar'
+  id: '__root__' | '/' | '/historico' | '/historico-senha' | '/instalar'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HistoricoRoute: typeof HistoricoRoute
   HistoricoSenhaRoute: typeof HistoricoSenhaRoute
+  InstalarRoute: typeof InstalarRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/instalar': {
+      id: '/instalar'
+      path: '/instalar'
+      fullPath: '/instalar'
+      preLoaderRoute: typeof InstalarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/historico-senha': {
       id: '/historico-senha'
       path: '/historico-senha'
@@ -89,7 +106,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HistoricoRoute: HistoricoRoute,
   HistoricoSenhaRoute: HistoricoSenhaRoute,
+  InstalarRoute: InstalarRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
