@@ -120,6 +120,12 @@ function HistoricoPage() {
           </div>
           <div className="flex items-center gap-2">
             <Link
+              to="/instalar"
+              className="rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20"
+            >
+              Instalar app
+            </Link>
+            <Link
               to="/"
               className="rounded-md border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20"
             >
