@@ -1,6 +1,6 @@
 import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { listCargoReleases } from "@/lib/releases.functions";
 import { ComprovanteLogistico, type ComprovanteData } from "@/components/ComprovanteLogistico";
 import logoAsset from "@/assets/logo-liberacao-carga.png.asset.json";
 import { isHistoricoUnlocked, lockHistorico } from "@/lib/gate.functions";
@@ -82,13 +82,12 @@ function HistoricoPage() {
 
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase
-        .from("cargo_releases" as never)
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(500);
-      if (error) setErro(error.message);
-      else setRows((data as unknown as Row[]) || []);
+      try {
+        const { rows } = await listCargoReleases();
+        setRows(rows as unknown as Row[]);
+      } catch (e) {
+        setErro(e instanceof Error ? e.message : "Falha ao carregar o histórico.");
+      }
       setLoading(false);
     })();
   }, []);
