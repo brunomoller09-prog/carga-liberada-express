@@ -18,5 +18,5 @@ export const listCargoReleases = createServerFn({ method: "GET" }).handler(async
     .order("created_at", { ascending: false })
     .limit(500);
   if (error) throw new Error(error.message);
-  return { rows: (data ?? []) as unknown[] };
+  return { rows: (data ?? []) as Record<string, string | number | null>[] };
 });
