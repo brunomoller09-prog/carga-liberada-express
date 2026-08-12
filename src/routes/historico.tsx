@@ -101,6 +101,45 @@ function HistoricoPage() {
       )
     : rows;
 
+  function exportarCSV() {
+    const cols: [string, (r: Row) => string][] = [
+      ["ID da Carga", (r) => r.id_carga],
+      ["Data", (r) => r.data],
+      ["Hora", (r) => r.hora],
+      ["Destino", (r) => r.destino],
+      ["Endereço", (r) => r.endereco],
+      ["Motorista", (r) => r.motorista ?? ""],
+      ["Transportadora", (r) => r.transportadora ?? ""],
+      ["Conferente", (r) => r.conferente ?? ""],
+      ["Placa Cavalo", (r) => r.placa_cavalo ?? ""],
+      ["Placa Baú", (r) => r.placa_bau ?? ""],
+      ["Paletes", (r) => r.paletes?.toString() ?? ""],
+      ["Lacre", (r) => r.lacre_1 ?? ""],
+      ["NF 1", (r) => r.nf_1 ?? ""],
+      ["Série 1", (r) => r.serie_1 ?? ""],
+      ["NF 2", (r) => r.nf_2 ?? ""],
+      ["Série 2", (r) => r.serie_2 ?? ""],
+      ["NF 3", (r) => r.nf_3 ?? ""],
+      ["Série 3", (r) => r.serie_3 ?? ""],
+      ["Observações", (r) => r.observacoes ?? ""],
+      ["Status", (r) => r.status],
+    ];
+    const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const linhas = [
+      cols.map((c) => esc(c[0])).join(";"),
+      ...filtradas.map((r) => cols.map((c) => esc(c[1](r))).join(";")),
+    ];
+    const blob = new Blob(["\uFEFF" + linhas.join("\r\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `liberacoes-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {imprimir && <ComprovanteLogistico registro={imprimir} />}
@@ -131,13 +170,20 @@ function HistoricoPage() {
       </header>
 
       <main className="no-print mx-auto max-w-5xl px-6 py-8">
-        <div className="mb-4">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row">
           <input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar por ID, destino, motorista, placa, transportadora..."
             className="w-full rounded-md border border-border bg-white px-4 py-2 text-sm outline-none focus:border-primary"
           />
+          <button
+            onClick={exportarCSV}
+            disabled={filtradas.length === 0}
+            className="shrink-0 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          >
+            Exportar Excel (CSV)
+          </button>
         </div>
 
         {erro && (
