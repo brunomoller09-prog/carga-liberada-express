@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import logoAsset from "@/assets/logo-liberacao-carga.png.asset.json";
+
 
 export const Route = createFileRoute("/instalar")({
   head: () => ({
@@ -69,16 +69,9 @@ function InstalarPage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="no-print bg-primary text-primary-foreground shadow-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-5">
-          <div className="flex items-center gap-4">
-            <img
-              src={logoAsset.url}
-              alt="Liberação de Carga"
-              className="h-12 w-12 rounded bg-white/10 object-contain p-1"
-            />
-            <div>
-              <p className="text-xs uppercase tracking-widest opacity-80">Britânia Eletrodomésticos</p>
-              <h1 className="text-2xl font-bold">Instalar aplicativo</h1>
-            </div>
+          <div>
+            <p className="text-xs uppercase tracking-widest opacity-80">Britânia Eletrodomésticos</p>
+            <h1 className="text-2xl font-bold">Instalar aplicativo</h1>
           </div>
           <Link
             to="/"
