@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { unlockHistorico } from "@/lib/gate.functions";
 import logoAsset from "@/assets/logo-liberacao-carga.png.asset.json";
 
@@ -21,6 +21,12 @@ function SenhaPage() {
   const unlock = useServerFn(unlockHistorico);
   const [erro, setErro] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const [pronto, setPronto] = useState(false);
+
+  useEffect(() => {
+    setPronto(true);
+    if (window.location.search) window.history.replaceState(null, "", window.location.pathname);
+  }, []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -41,7 +47,7 @@ function SenhaPage() {
           <h1 className="mt-4 text-xl font-bold text-primary">Acesso Restrito</h1>
           <p className="mt-1 text-sm text-muted-foreground">Informe a senha para ver o histórico de liberações.</p>
         </div>
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} method="post" action="#" className="space-y-4">
           <input
             name="password"
             type="password"
@@ -53,10 +59,10 @@ function SenhaPage() {
           {erro && <p className="text-sm text-destructive">Senha incorreta.</p>}
           <button
             type="submit"
-            disabled={enviando}
+            disabled={enviando || !pronto}
             className="w-full rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
           >
-            {enviando ? "Verificando..." : "Entrar"}
+            {!pronto ? "Carregando..." : enviando ? "Verificando..." : "Entrar"}
           </button>
         </form>
         <div className="mt-4 text-center">
