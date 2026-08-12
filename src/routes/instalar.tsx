@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import logoAsset from "@/assets/logo-liberacao-carga.png.asset.json";
+
 
 export const Route = createFileRoute("/instalar")({
   head: () => ({
