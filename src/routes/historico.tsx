@@ -2,8 +2,8 @@ import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-rout
 import { useEffect, useState } from "react";
 import { listCargoReleases } from "@/lib/releases.functions";
 import { ComprovanteLogistico, type ComprovanteData } from "@/components/ComprovanteLogistico";
-import logoAsset from "@/assets/logo-liberacao-carga.png.asset.json";
 import { isHistoricoUnlocked, lockHistorico } from "@/lib/gate.functions";
+
 
 export const Route = createFileRoute("/historico")({
   beforeLoad: async () => {
