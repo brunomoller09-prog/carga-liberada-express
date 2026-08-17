@@ -23,12 +23,12 @@ const DESTINOS: { value: string; endereco: string }[] = [
   { value: "TIGRE", endereco: "R. Ottokar Doerffel, 875 - Atiradores" },
   { value: "WEG", endereco: "Rod. Gov. Mário Covas 475 - Espinheiros, Itajaí - SC" },
 ];
-
+//Filtrar NF e serie 
 function extractNfInfo(barcode: string): { nf: string; serie: string } {
   const clean = (barcode || "").replace(/\D/g, "");
   if (clean.length < 34) return { nf: "", serie: "" };
   const serie = clean.substring(22, 25);
-  const numero = clean.substring(25, 34).replace(/^0+/, "");
+  const numero = clean.substring(27, 34).replace(/^0+/, "");
   return { nf: numero, serie };
 }
 
