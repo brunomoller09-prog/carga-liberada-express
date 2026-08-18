@@ -4,8 +4,14 @@ import { useEffect, useState } from "react";
 import { unlockHistorico } from "@/lib/gate.functions";
 import logoAsset from "@/assets/logo-liberacao-carga.png.asset.json";
 
+// Esta é a TELA DE LOGIN do histórico (a página que pede a senha
+// antes de mostrar as liberações). O caminho da URL é
+// "/historico-senha" — ela é sempre a primeira parada antes de
+// "/historico" em si.
 export const Route = createFileRoute("/historico-senha")({
   component: SenhaPage,
+    // Configura o <title> da aba do navegador e as meta-tags usadas
+  // por buscadores e por prévias de link (WhatsApp, etc.).
   head: () => ({
     meta: [
       { title: "Acesso ao Histórico - Liberação de Carga" },
@@ -18,6 +24,9 @@ export const Route = createFileRoute("/historico-senha")({
 
 function SenhaPage() {
   const router = useRouter();
+   // "Empacota" a função de servidor unlockHistorico (definida em
+  // gate.functions.ts) para poder ser chamada aqui do navegador,
+  // como se fosse uma função JavaScript comum.
   const unlock = useServerFn(unlockHistorico);
   const [erro, setErro] = useState(false);
   const [enviando, setEnviando] = useState(false);
@@ -33,6 +42,8 @@ function SenhaPage() {
     setEnviando(true);
     setErro(false);
     const password = String(new FormData(e.currentTarget).get("password") ?? "");
+     // Envia a senha digitada para o servidor, que compara com
+    // HISTORICO_PASSWORD (ver gate.functions.ts) e devolve {ok: true/false}.
     const { ok } = await unlock({ data: { password } });
     setEnviando(false);
     if (ok) await router.navigate({ to: "/historico" });
@@ -48,6 +59,9 @@ function SenhaPage() {
           <p className="mt-1 text-sm text-muted-foreground">Informe a senha para ver o histórico de liberações.</p>
         </div>
         <form onSubmit={onSubmit} method="post" action="#" className="space-y-4">
+                    {/* type="password" faz o navegador mostrar •••• em vez do texto digitado.
+              autoComplete="current-password" permite que gerenciadores de senha
+              (como o do Chrome) ofereçam preencher automaticamente. */}
           <input
             name="password"
             type="password"
@@ -57,6 +71,8 @@ function SenhaPage() {
             className="w-full rounded-md border border-border bg-white px-4 py-2 text-sm outline-none focus:border-primary"
           />
           {erro && <p className="text-sm text-destructive">Senha incorreta.</p>}
+            {/* Botão fica desabilitado ("Verificando...") enquanto espera a
+              resposta do servidor, para impedir clique duplo/repetido. */}
           <button
             type="submit"
             disabled={enviando || !pronto}
