@@ -32,6 +32,9 @@ function extractNfInfo(barcode: string): { nf: string; serie: string } {
   return { nf: numero, serie };
 }
 
+// Limite de notas por liberação (evita comprovante gigante / erro de leitura).
+const MAX_NOTAS = 20;
+
 function pad(n: number) {
   return n.toString().padStart(2, "0");
 }
@@ -148,9 +151,9 @@ type Registro = ComprovanteData;
 function LiberacaoCarga() {
   const [destino, setDestino] = useState("");
   const [endereco, setEndereco] = useState("");
-  const [cb1, setCb1] = useState("");
-  const [cb2, setCb2] = useState("");
-  const [cb3, setCb3] = useState("");
+  // Lista de códigos de barras (um por nota fiscal). Começa com 3 campos
+  // e o conferente pode adicionar mais com o botão "+ Adicionar nota fiscal".
+  const [cbs, setCbs] = useState<string[]>(["", "", ""]);
   const [placaCavalo, setPlacaCavalo] = useState("");
   const [placaBau, setPlacaBau] = useState("");
   const [motorista, setMotorista] = useState("");
@@ -164,9 +167,30 @@ function LiberacaoCarga() {
   const [erro, setErro] = useState<string | null>(null);
   const [registro, setRegistro] = useState<Registro | null>(null);
 
-  const nf1 = useMemo(() => extractNfInfo(cb1), [cb1]);
-  const nf2 = useMemo(() => extractNfInfo(cb2), [cb2]);
-  const nf3 = useMemo(() => extractNfInfo(cb3), [cb3]);
+  // NF e série de cada código lido (mesma ordem da lista cbs).
+  const notas = useMemo(() => cbs.map((c) => (c ? extractNfInfo(c) : { nf: "", serie: "" })), [cbs]);
+  const lidas = cbs.filter(Boolean).length;
+  // Códigos repetidos (a mesma NF bipada duas vezes) — avisa antes de salvar.
+  const duplicados = useMemo(() => {
+    const vistos = new Set<string>();
+    const dups = new Set<string>();
+    for (const c of cbs) {
+      if (!c) continue;
+      if (vistos.has(c)) dups.add(c);
+      vistos.add(c);
+    }
+    return dups;
+  }, [cbs]);
+
+  function setCb(i: number, v: string) {
+    setCbs((prev) => prev.map((c, idx) => (idx === i ? v : c)));
+  }
+  function adicionarNota() {
+    setCbs((prev) => (prev.length >= MAX_NOTAS ? prev : [...prev, ""]));
+  }
+  function removerNota(i: number) {
+    setCbs((prev) => prev.filter((_, idx) => idx !== i));
+  }
 
   const isTerceiro = destino === "TERCEIRO";
 
@@ -182,7 +206,7 @@ function LiberacaoCarga() {
 
   function limpar() {
     setDestino(""); setEndereco("");
-    setCb1(""); setCb2(""); setCb3("");
+    setCbs(["", "", ""]);
     setPlacaCavalo(""); setPlacaBau("");
     setMotorista(""); setTransportadora("");
     setPaletes("");
@@ -195,15 +219,20 @@ function LiberacaoCarga() {
     e.preventDefault();
     setErro(null);
 
-    if (!destino || !endereco || !cb1 || !conferente) {
+    if (!destino || !endereco || !cbs[0] || !conferente) {
       setErro("⚠️ Verifique os campos obrigatórios antes de finalizar.");
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
-    const invalido = [cb1, cb2, cb3].some((c) => c && c.replace(/\D/g, "").length !== 44);
+    const invalido = cbs.some((c) => c && c.replace(/\D/g, "").length !== 44);
     if (invalido) {
       setErro("⚠️ Cada código de barras deve conter exatamente 44 dígitos.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (duplicados.size > 0) {
+      setErro("⚠️ Há nota fiscal lida em duplicidade. Remova a repetida antes de finalizar.");
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
@@ -214,18 +243,26 @@ function LiberacaoCarga() {
     const dataFmt = `${pad(agora.getDate())}/${pad(agora.getMonth() + 1)}/${agora.getFullYear()}`;
     const horaFmt = `${pad(agora.getHours())}:${pad(agora.getMinutes())}`;
 
-    const payload = {
+    // Só considera os campos que foram realmente lidos, mantendo a ordem.
+    const lidos = cbs
+      .map((c, i) => ({ cb: c, ...notas[i] }))
+      .filter((n) => n.cb);
+    // As 3 primeiras notas ficam nas colunas antigas (nf_1..3); da 4ª em
+    // diante vão para a coluna JSON "notas_extras".
+    const extras = lidos.slice(3).map((n) => ({ codigo_barras: n.cb, nf: n.nf, serie: n.serie }));
+
+    const payload: Record<string, unknown> = {
       id_carga: idCarga,
       data: dataFmt,
       hora: horaFmt,
       destino,
       endereco,
-      codigo_barras_1: cb1,
-      codigo_barras_2: cb2 || null,
-      codigo_barras_3: cb3 || null,
-      nf_1: nf1.nf || null, serie_1: nf1.serie || null,
-      nf_2: cb2 ? nf2.nf || null : null, serie_2: cb2 ? nf2.serie || null : null,
-      nf_3: cb3 ? nf3.nf || null : null, serie_3: cb3 ? nf3.serie || null : null,
+      codigo_barras_1: lidos[0]?.cb ?? "",
+      codigo_barras_2: lidos[1]?.cb ?? null,
+      codigo_barras_3: lidos[2]?.cb ?? null,
+      nf_1: lidos[0]?.nf || null, serie_1: lidos[0]?.serie || null,
+      nf_2: lidos[1]?.nf || null, serie_2: lidos[1]?.serie || null,
+      nf_3: lidos[2]?.nf || null, serie_3: lidos[2]?.serie || null,
       placa_cavalo: placaCavalo || null,
       placa_bau: placaBau || null,
       motorista: motorista || null,
@@ -239,6 +276,9 @@ function LiberacaoCarga() {
       status: "Gerado",
       observacoes: observacoes || null,
     };
+    // Só envia notas_extras quando existe (assim o site continua funcionando
+    // mesmo antes de rodar o SQL que cria essa coluna, para liberações de até 3 NFs).
+    if (extras.length > 0) payload.notas_extras = extras;
 
     const { error } = await supabase.from("cargo_releases" as never).insert(payload as never);
     setSaving(false);
@@ -251,9 +291,10 @@ function LiberacaoCarga() {
     setRegistro({
       idCarga, data: dataFmt, hora: horaFmt,
       destino, endereco,
-      nf1: nf1.nf, serie1: nf1.serie,
-      nf2: cb2 ? nf2.nf : "", serie2: cb2 ? nf2.serie : "",
-      nf3: cb3 ? nf3.nf : "", serie3: cb3 ? nf3.serie : "",
+      nf1: lidos[0]?.nf ?? "", serie1: lidos[0]?.serie ?? "",
+      nf2: lidos[1]?.nf ?? "", serie2: lidos[1]?.serie ?? "",
+      nf3: lidos[2]?.nf ?? "", serie3: lidos[2]?.serie ?? "",
+      notasExtras: extras.map((n) => ({ nf: n.nf, serie: n.serie })),
       placaCavalo, placaBau, motorista, transportadora,
       conferente,
       lacre1,
@@ -348,24 +389,33 @@ function LiberacaoCarga() {
               </p>
             </Section>
 
-            <Section titulo="2. Notas Fiscais">
-              <Field label="Código de Barras 1 * (somente scanner)" full>
-                <BarcodeScanInput value={cb1} onChange={(v) => setCb1(onlyDigits(v))} required autoFocus />
-              </Field>
-              <Field label="NF 1"><input value={nf1.nf} readOnly className="input bg-muted" /></Field>
-              <Field label="Série 1"><input value={nf1.serie} readOnly className="input bg-muted" /></Field>
-
-              <Field label="Código de Barras 2 (somente scanner)" full>
-                <BarcodeScanInput value={cb2} onChange={(v) => setCb2(onlyDigits(v))} />
-              </Field>
-              <Field label="NF 2"><input value={cb2 ? nf2.nf : ""} readOnly className="input bg-muted" /></Field>
-              <Field label="Série 2"><input value={cb2 ? nf2.serie : ""} readOnly className="input bg-muted" /></Field>
-
-              <Field label="Código de Barras 3 (somente scanner)" full>
-                <BarcodeScanInput value={cb3} onChange={(v) => setCb3(onlyDigits(v))} />
-              </Field>
-              <Field label="NF 3"><input value={cb3 ? nf3.nf : ""} readOnly className="input bg-muted" /></Field>
-              <Field label="Série 3"><input value={cb3 ? nf3.serie : ""} readOnly className="input bg-muted" /></Field>
+            <Section titulo={`2. Notas Fiscais (${lidas} lida${lidas === 1 ? "" : "s"})`}>
+              {cbs.map((cb, i) => (
+                <NotaBloco
+                  key={i}
+                  indice={i}
+                  cb={cb}
+                  nf={notas[i].nf}
+                  serie={notas[i].serie}
+                  obrigatoria={i === 0}
+                  duplicada={!!cb && duplicados.has(cb)}
+                  onChange={(v) => setCb(i, onlyDigits(v))}
+                  onRemover={i >= 3 ? () => removerNota(i) : undefined}
+                />
+              ))}
+              <div className="col-span-full">
+                <button
+                  type="button"
+                  onClick={adicionarNota}
+                  disabled={cbs.length >= MAX_NOTAS}
+                  className="rounded-md border border-dashed border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-accent disabled:opacity-50"
+                >
+                  + Adicionar nota fiscal
+                </button>
+                <span className="ml-3 text-xs text-muted-foreground">
+                  Máximo de {MAX_NOTAS} notas por liberação.
+                </span>
+              </div>
             </Section>
 
             <Section titulo="3. Dados do Veículo">
@@ -432,6 +482,47 @@ function LiberacaoCarga() {
         .input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 2px oklch(0.35 0.09 250 / 0.15); }
       `}</style>
     </div>
+  );
+}
+
+// Um bloco de nota fiscal: campo do scanner + NF + série (somente leitura).
+// Blocos a partir do 4º têm botão "Remover".
+function NotaBloco({
+  indice, cb, nf, serie, obrigatoria, duplicada, onChange, onRemover,
+}: {
+  indice: number; cb: string; nf: string; serie: string;
+  obrigatoria: boolean; duplicada: boolean;
+  onChange: (v: string) => void; onRemover?: () => void;
+}) {
+  const n = indice + 1;
+  return (
+    <>
+      <Field label={`Código de Barras ${n}${obrigatoria ? " *" : ""} (somente scanner)`} full>
+        <div className="flex items-start gap-2">
+          <div className="flex-1">
+            <BarcodeScanInput
+              value={cb}
+              onChange={onChange}
+              required={obrigatoria}
+              autoFocus={obrigatoria || indice >= 3}
+            />
+          </div>
+          {onRemover && (
+            <button
+              type="button"
+              onClick={onRemover}
+              className="rounded border border-destructive/40 px-3 py-1 text-xs text-destructive hover:bg-destructive/10"
+              title="Remover esta nota"
+            >
+              Remover
+            </button>
+          )}
+        </div>
+        {duplicada && <span className="text-xs font-semibold text-destructive">⚠️ Esta nota já foi lida acima.</span>}
+      </Field>
+      <Field label={`NF ${n}`}><input value={nf} readOnly className="input bg-muted" /></Field>
+      <Field label={`Série ${n}`}><input value={serie} readOnly className="input bg-muted" /></Field>
+    </>
   );
 }
 

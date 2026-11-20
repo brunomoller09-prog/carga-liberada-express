@@ -9,6 +9,8 @@ export type ComprovanteData = {
   nf1: string; serie1: string;
   nf2: string; serie2: string;
   nf3: string; serie3: string;
+  // Notas a partir da 4ª (opcional, para manter compatibilidade).
+  notasExtras?: { nf: string; serie: string }[];
   placaCavalo: string; placaBau: string;
   motorista: string; transportadora: string;
   conferente: string;
@@ -22,7 +24,10 @@ export function ComprovanteLogistico({ registro }: { registro: ComprovanteData }
     { nf: registro.nf1, serie: registro.serie1 },
     { nf: registro.nf2, serie: registro.serie2 },
     { nf: registro.nf3, serie: registro.serie3 },
+    ...(registro.notasExtras ?? []),
   ].filter((n) => n.nf);
+  // Sempre mostra pelo menos 3 linhas; se tiver mais notas, a tabela cresce.
+  const linhasNotas = Array.from({ length: Math.max(3, notas.length) }, (_, i) => i);
   const lacres = [registro.lacre1].filter(Boolean);
 
   return (
@@ -74,7 +79,7 @@ export function ComprovanteLogistico({ registro }: { registro: ComprovanteData }
               <div className="border-b border-black px-2 py-1"><strong>NOTA FISCAL – SÉRIE</strong></div>
               <table className="w-full border-collapse">
                 <tbody>
-                  {[0, 1, 2].map((i) => {
+                  {linhasNotas.map((i) => {
                     const n = notas[i];
                     return (
                       <tr key={i}>
