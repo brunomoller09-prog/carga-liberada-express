@@ -16,7 +16,7 @@ export const listCargoReleases = createServerFn({ method: "GET" }).handler(async
   const session = await useSession<{ unlocked?: boolean }>({
     password: process.env.SESSION_SECRET!,
     name: "historico-gate",
-    maxAge: 60 * 60 * 8,
+    maxAge: 60 * 60 * 2,
     cookie: { httpOnly: true, secure: true, sameSite: "lax" as const, path: "/" },
   });
   if (session.data.unlocked !== true) {
@@ -31,12 +31,12 @@ export const listCargoReleases = createServerFn({ method: "GET" }).handler(async
   // incluído no pacote JavaScript enviado ao navegador.
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  // Busca até 500 liberações mais recentes, da mais nova para a mais antiga.
+  // Busca até 2000 liberações mais recentes, da mais nova para a mais antiga.
   const { data, error } = await supabaseAdmin
     .from("cargo_releases" as never)
     .select("*")
     .order("created_at", { ascending: false })
-    .limit(500);
+    .limit(2000);
   
   if (error) throw new Error(error.message);
   return { rows: (data ?? []) as Record<string, string | number | null>[] };
