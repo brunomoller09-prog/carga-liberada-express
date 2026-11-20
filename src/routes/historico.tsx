@@ -1,5 +1,5 @@
 import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { listCargoReleases } from "@/lib/releases.functions";
 import { ComprovanteLogistico, type ComprovanteData } from "@/components/ComprovanteLogistico";
 import { isHistoricoUnlocked, lockHistorico } from "@/lib/gate.functions";
@@ -46,6 +46,8 @@ type Row = {
 };
 
 const POR_PAGINA = 25;
+// Tempo sem mexer na tela até sair sozinho (15 minutos).
+const INATIVIDADE_MS = 15 * 60 * 1000;
 
 // Todas as NFs de uma liberação (3 colunas + extras), já sem vazios.
 function todasNotas(r: Row): { nf: string; serie: string }[] {
@@ -75,6 +77,35 @@ function HistoricoPage() {
   const [de, setDe] = useState("");
   const [ate, setAte] = useState("");
   const [pagina, setPagina] = useState(1);
+  const [saindo, setSaindo] = useState(false);
+
+  // Sair: apaga a sessão no servidor e volta para a tela de senha.
+  // "replace" evita que o botão Voltar do navegador reabra o histórico.
+  const sair = useCallback(async () => {
+    setSaindo(true);
+    try {
+      await lockHistorico();
+    } finally {
+      await router.invalidate();
+      await router.navigate({ to: "/historico-senha", replace: true });
+    }
+  }, [router]);
+
+  // Saída automática por inatividade (15 min sem mouse/teclado/toque).
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    const reiniciar = () => {
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => void sair(), INATIVIDADE_MS);
+    };
+    const eventos = ["mousemove", "keydown", "click", "touchstart", "scroll"] as const;
+    eventos.forEach((e) => window.addEventListener(e, reiniciar, { passive: true }));
+    reiniciar();
+    return () => {
+      eventos.forEach((e) => window.removeEventListener(e, reiniciar));
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, [sair]);
 
   function toComprovante(r: Row): ComprovanteData {
     return {
@@ -111,10 +142,15 @@ function HistoricoPage() {
       const { rows } = await listCargoReleases();
       setRows(rows as unknown as Row[]);
     } catch (e) {
+      // Sessão expirada (401): volta para a tela de senha em vez de mostrar erro.
+      if (e instanceof Response && e.status === 401) {
+        await router.navigate({ to: "/historico-senha", replace: true });
+        return;
+      }
       setErro(e instanceof Error ? e.message : "Falha ao carregar o histórico.");
     }
     setLoading(false);
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     void carregar();
@@ -213,13 +249,11 @@ function HistoricoPage() {
               Nova Liberação
             </Link>
             <button
-              onClick={async () => {
-                await lockHistorico();
-                await router.navigate({ to: "/historico-senha" });
-              }}
-              className="rounded-md border border-primary-foreground/30 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20"
+              onClick={() => void sair()}
+              disabled={saindo}
+              className="rounded-md border border-primary-foreground/30 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-foreground/20 disabled:opacity-60"
             >
-              Sair
+              {saindo ? "Saindo..." : "Sair"}
             </button>
           </div>
         </div>

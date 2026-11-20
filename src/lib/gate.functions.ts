@@ -19,9 +19,10 @@ function sessionConfig() {
     // Se essa variável estiver vazia, a sessão não funciona (erro "Empty password").
     password: process.env.SESSION_SECRET!,
     name: "historico-gate",
-    // Tempo de validade do cookie: 8 horas (60 segundos * 60 minutos * 8).
-    // Depois disso a pessoa precisa digitar a senha de novo.
-    maxAge: 60 * 60 * 8,
+    // Tempo de validade do cookie: 2 horas. Além disso a tela de histórico
+    // sai sozinha após 15 min sem uso. IMPORTANTE: manter igual em
+    // releases.functions.ts.
+    maxAge: 60 * 60 * 2,
     cookie: { httpOnly: true, secure: true, sameSite: "lax" as const, path: "/" },
   };
 }
