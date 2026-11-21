@@ -26,194 +26,161 @@ export function ComprovanteLogistico({ registro }: { registro: ComprovanteData }
     { nf: registro.nf3, serie: registro.serie3 },
     ...(registro.notasExtras ?? []),
   ].filter((n) => n.nf);
-  // Layout das notas: 1 coluna (até 5), 2 colunas (6–14), 3 colunas (15+).
-  const colunasNotas = notas.length > 14 ? 3 : notas.length > 5 ? 2 : 1;
+  // Layout das notas: 1 coluna (até 3), 2 colunas (4–14), 3 colunas (15+).
+  // Lê de cima para baixo em cada coluna e a fonte diminui com a quantidade.
+  const colunasNotas = notas.length > 14 ? 3 : notas.length > 3 ? 2 : 1;
   const linhasPorColuna = Math.max(1, Math.ceil(notas.length / colunasNotas));
-  const lacres = [registro.lacre1].filter(Boolean);
+  const fonteNotas = notas.length > 14 ? 10 : notas.length > 8 ? 11 : 12.5;
+
+  // Os 6 campos de assinatura/carimbo do formulário LG-SC.FO.030.
+  const assinaturas = [
+    { titulo: "Carimbo Conferente", legenda: "Assinar esse campo ao liberar a carga" },
+    { titulo: "Assinatura Motorista", legenda: "Assinar esse campo após conferir destino" },
+    { titulo: "Datas", legenda: "" },
+    { titulo: "Carimbo Portaria", legenda: "Assinar esse campo na saída e entrada da portaria" },
+    { titulo: "Assinatura Recebimento", legenda: "Assinar esse campo no recebimento da carga" },
+    { titulo: "Carimbo Controladoria Fábrica", legenda: "Assinar esse campo na devolução do canhoto" },
+  ];
 
   return (
     <div id="print-area" className="bg-white text-black">
-      <table className="britania-doc w-full border-collapse text-[12px]">
-        <colgroup>
-          <col style={{ width: "14%" }} />
-          <col style={{ width: "10%" }} />
-          <col style={{ width: "10%" }} />
-          <col style={{ width: "12%" }} />
-          <col style={{ width: "10%" }} />
-          <col style={{ width: "10%" }} />
-          <col style={{ width: "10%" }} />
-          <col style={{ width: "12%" }} />
-          <col style={{ width: "12%" }} />
-        </colgroup>
-        <tbody>
-          <tr>
-            <td className="w-[22%] align-middle" rowSpan={1}>
-              <img src={britaniaLogo} alt="Britânia" className="mx-auto h-10 object-contain" />
-            </td>
-            <td colSpan={4} className="text-center align-middle">
-              <strong>Comprovante Movimentação Logística</strong>
-            </td>
-            <td colSpan={2}>
-              <div><strong>N.:</strong></div>
-              <div>LG-SC.FO.030</div>
-            </td>
-            <td>
-              <div><strong>Rev:</strong></div>
-              <div>4</div>
-            </td>
-            <td>
-              <div><strong>Data:</strong></div>
-              <div>20/02/2026</div>
-            </td>
-          </tr>
-
-          <tr>
-            <td colSpan={3} className="align-top">
-              <div><strong>Destino:</strong> {registro.destino}</div>
-              <div className="mt-2"><strong>Endereço:</strong> {registro.endereco}</div>
-            </td>
-            <td className="text-center align-top">
-              <div><strong>Nº de Paletes</strong></div>
-              <div className="mt-2">{registro.paletes || "—"}</div>
-            </td>
-            <td colSpan={5} className="align-top p-0">
-              <div className="border-b border-black px-2 py-1"><strong>NOTA FISCAL – SÉRIE</strong></div>
-              {/* Lista de notas SEM tabela/quadrados. Até 5 notas: uma coluna.
-                  6 a 14: duas colunas lado a lado. 15 ou mais: três colunas.
-                  A fonte diminui conforme aumenta a quantidade, para a folha
-                  não crescer demais. */}
-              <div
-                className="grid gap-x-4 gap-y-0.5 px-2 py-1.5"
-                style={{
-                  gridTemplateColumns: `repeat(${colunasNotas}, minmax(0, 1fr))`,
-                  gridAutoFlow: "column",
-                  gridTemplateRows: `repeat(${linhasPorColuna}, auto)`,
-                  fontSize: notas.length > 14 ? "9px" : notas.length > 5 ? "10px" : "11px",
-                  minHeight: notas.length <= 3 ? "3.6em" : undefined,
-                }}
-              >
-                {notas.map((n, i) => (
-                  <div key={i} className="whitespace-nowrap">
-                    <span className="font-semibold">{n.nf}</span>
-                    <span className="text-black/60"> – Série {n.serie || "—"}</span>
-                  </div>
-                ))}
+      <div className="comp-a">
+        {/* Cabeçalho azul: logo, título, nº do formulário e ID da carga */}
+        <div className="comp-card">
+          <div className="comp-head">
+            <div className="comp-head-left">
+              <div className="comp-logo">
+                <img src={britaniaLogo} alt="Britânia" />
               </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td colSpan={6} className="align-top">
-              <div><strong>MOTORISTA:</strong> <u>{registro.motorista || " "}</u></div>
-              <div className="mt-2"><strong>TRANSPORTADORA:</strong> {registro.transportadora || " "}</div>
-            </td>
-            <td colSpan={3} className="align-top">
-              <div><strong>LACRE:</strong></div>
-              <div className="mt-1 whitespace-pre-line">
-                {lacres.length ? lacres.join("\n") : " "}
+              <div>
+                <div className="comp-titulo">Comprovante de Movimentação Logística</div>
+                <div className="comp-sub">LG-SC.FO.030 · Rev. 4 · 20/02/2026</div>
               </div>
-            </td>
-          </tr>
+            </div>
+            <div className="comp-head-right">
+              <div className="comp-mini">ID DA CARGA</div>
+              <div className="comp-id">{registro.idCarga}</div>
+              <div className="comp-sub">{registro.data} · {registro.hora}</div>
+            </div>
+          </div>
 
-          <tr>
-            <td colSpan={6}>
-              <strong>CONFERENTE:</strong> {registro.conferente}
-            </td>
-            <td
-              colSpan={3}
-              rowSpan={2}
-              className="align-middle text-center text-white"
-              style={{ background: "#000" }}
+          {/* Destino, paletes e lacre */}
+          <div className="comp-info">
+            <div className="comp-box">
+              <div className="comp-label">DESTINO</div>
+              <div className="comp-destino">{registro.destino}</div>
+              <div className="comp-end">{registro.endereco}</div>
+            </div>
+            <div className="comp-box">
+              <div className="comp-label">PALETES</div>
+              <div className="comp-valor-g">{registro.paletes || "—"}</div>
+            </div>
+            <div className="comp-box">
+              <div className="comp-label">LACRE</div>
+              <div className="comp-valor-m">{registro.lacre1 || "—"}</div>
+            </div>
+          </div>
+
+          {/* Notas fiscais (sem tabela) */}
+          <div className="comp-notas">
+            <div className="comp-label" style={{ marginBottom: 6 }}>
+              NOTAS FISCAIS – SÉRIE ({notas.length})
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridAutoFlow: "column",
+                gridTemplateColumns: `repeat(${colunasNotas}, minmax(0, 1fr))`,
+                gridTemplateRows: `repeat(${linhasPorColuna}, auto)`,
+                gap: "3px 18px",
+                fontSize: fonteNotas,
+              }}
             >
-              <div className="text-[10px] font-semibold uppercase tracking-widest opacity-80">
-                ID da Carga
-              </div>
-              <div className="mt-1 font-mono text-[14px] font-bold">
-                {registro.idCarga}
-              </div>
-            </td>
-          </tr>
+              {notas.map((n, i) => (
+                <div key={i} style={{ whiteSpace: "nowrap" }}>
+                  <b>{n.nf}</b>
+                  <span style={{ color: "#777" }}> · Série {n.serie || "—"}</span>
+                </div>
+              ))}
+              {notas.length === 0 && <div style={{ color: "#777" }}>—</div>}
+            </div>
+          </div>
 
-          <tr>
-            <td colSpan={6}>
-              <div><strong>PLACA CAVALO:</strong> {registro.placaCavalo || " "}</div>
-              <div className="mt-2"><strong>PLACA BAÚ:</strong> {registro.placaBau || " "}</div>
-            </td>
-          </tr>
+          {/* Motorista, transportadora, placas, conferente */}
+          <div className="comp-rodape">
+            <div><div className="comp-label">MOTORISTA</div><b>{registro.motorista || "—"}</b></div>
+            <div><div className="comp-label">TRANSPORTADORA</div><b>{registro.transportadora || "—"}</b></div>
+            <div>
+              <div className="comp-label">PLACA CAVALO / BAÚ</div>
+              <b>{registro.placaCavalo || "—"} / {registro.placaBau || "—"}</b>
+            </div>
+            <div><div className="comp-label">CONFERENTE</div><b>{registro.conferente || "—"}</b></div>
+          </div>
+        </div>
 
-          <tr className="text-center font-bold">
-            <td colSpan={2}>CARIMBO CONFERENTE</td>
-            <td colSpan={4}>ASSINATURA MOTORISTA</td>
-            <td colSpan={3}>DATAs</td>
-          </tr>
-          <tr>
-            <td colSpan={2} className="h-44 align-top text-center text-[11px]">
-              <div className="mx-4 mt-20 border-b border-black"></div>
-              <div className="mt-2">ASSINAR ESSE CAMPO AO LIBERAR A CARGA</div>
-            </td>
-            <td colSpan={4} className="h-44 align-top text-center text-[11px]">
-              <div className="mx-4 mt-20 border-b border-black"></div>
-              <div className="mt-2">ASSINAR ESSE CAMPO APÓS CONFERIR DESTINO</div>
-            </td>
-            <td colSpan={3} className="align-top text-[13px]">
-              <div className="px-2 py-1"><strong>Data:</strong> {registro.data}</div>
-              <div className="px-2 py-1"><strong>Hora:</strong> {registro.hora}</div>
-            </td>
-          </tr>
+        {/* Assinaturas e carimbos (6 campos, como no formulário original) */}
+        <div className="comp-assin">
+          {assinaturas.map((a) => (
+            <div key={a.titulo} className="comp-ass-box">
+              <div className="comp-ass-titulo">{a.titulo}</div>
+              {a.titulo === "Datas" ? (
+                <div className="comp-datas">
+                  <div><b>Data:</b> {registro.data}</div>
+                  <div><b>Hora:</b> {registro.hora}</div>
+                </div>
+              ) : (
+                <>
+                  <div className="comp-linha" />
+                  <div className="comp-cap">{a.legenda}</div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
 
-          <tr className="text-center font-bold">
-            <td colSpan={2}>CARIMBO PORTARIA</td>
-            <td colSpan={4}>ASSINATURA RECEBIMENTO</td>
-            <td colSpan={3}>CARIMBO CONTROLADORIA FÁBRICA</td>
-          </tr>
-          <tr>
-            <td colSpan={2} className="h-44 align-top text-center text-[11px]">
-              <div className="mx-4 mt-20 border-b border-black"></div>
-              <div className="mt-2">ASSINAR ESSE CAMPO NA SAÍDA E ENTRADA DA PORTARIA</div>
-            </td>
-            <td colSpan={4} className="h-44 align-top text-center text-[11px]">
-              <div className="mx-4 mt-20 border-b border-black"></div>
-              <div className="mt-2">ASSINAR ESSE CAMPO NO RECEBIMENTO DA CARGA</div>
-            </td>
-            <td colSpan={3} className="h-44 align-top text-center text-[11px]">
-              <div className="mx-4 mt-20 border-b border-black"></div>
-              <div className="mt-2">ASSINAR ESSE CAMPO NA DEVOLUÇÃO DO CANHOTO</div>
-            </td>
-          </tr>
+        {registro.observacoes && (
+          <div className="comp-obs"><b>Observações:</b> {registro.observacoes}</div>
+        )}
 
-          <tr>
-            <td colSpan={9} className="bg-black text-center font-bold text-white">
-              ORIENTAÇÕES GERAIS
-            </td>
-          </tr>
-          <tr>
-            <td colSpan={9} className="text-[11px] leading-relaxed">
-              <div>* Motorista Verificar a Placa e o Destino da Carga antes de assinar no campo solicitado.</div>
-              <div>* Portaria Verificar se as NFs deste formulário estão grampeadas neste documento. (Não é descartado a conferência padrão dos lacres)</div>
-              <div>* Recebimento Confirmar o recebimento da Carga e das NFs contidas nesse documento.</div>
-              <div>* Controladoria Fábrica carimbar e assinar após o recebimento dos canhotos assinados confirmando entrega da Carga.</div>
-            </td>
-          </tr>
-          <tr>
-            <td colSpan={9} className="text-[11px] leading-relaxed">
-              * Liberação de carga mediante veículos contratados pelo cliente denominado como DESTINO - é dever do conferente solicitar assinatura do motorista nos canhotos e entregar na controladoria da fábrica
-            </td>
-          </tr>
-
-          {registro.observacoes && (
-            <tr>
-              <td colSpan={9} className="text-[11px]">
-                <strong>Observações:</strong> {registro.observacoes}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+        <div className="comp-orient">
+          <b>ORIENTAÇÕES GERAIS</b>
+          <div>• Motorista: verificar a placa e o destino da carga antes de assinar no campo solicitado.</div>
+          <div>• Portaria: verificar se as NFs deste formulário estão grampeadas neste documento. (Não é descartada a conferência padrão dos lacres.)</div>
+          <div>• Recebimento: confirmar o recebimento da carga e das NFs contidas neste documento.</div>
+          <div>• Controladoria Fábrica: carimbar e assinar após o recebimento dos canhotos assinados, confirmando a entrega da carga.</div>
+          <div>• Liberação de carga mediante veículos contratados pelo cliente denominado como DESTINO: é dever do conferente solicitar a assinatura do motorista nos canhotos e entregar na controladoria da fábrica.</div>
+        </div>
+      </div>
 
       <style>{`
-        .britania-doc, .britania-doc td { border: 1px solid #000; }
-        .britania-doc td { padding: 6px 8px; vertical-align: top; }
-        .britania-doc table td { border: 1px solid #000; }
+        .comp-a { font-family: Inter, "Segoe UI", Arial, sans-serif; color: #111; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .comp-card { border: 1px solid #cfd6e0; border-radius: 14px; overflow: hidden; }
+        .comp-head { background: #0d3b6b; color: #fff; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .comp-head-left { display: flex; align-items: center; gap: 12px; }
+        .comp-logo { background: #fff; border-radius: 8px; padding: 5px 9px; }
+        .comp-logo img { height: 30px; display: block; }
+        .comp-titulo { font-size: 15px; font-weight: 700; line-height: 1.2; }
+        .comp-sub { font-size: 10px; opacity: .85; }
+        .comp-head-right { text-align: right; white-space: nowrap; }
+        .comp-mini { font-size: 8.5px; letter-spacing: 2px; opacity: .75; }
+        .comp-id { font-family: ui-monospace, Consolas, monospace; font-size: 15px; font-weight: 700; }
+        .comp-info { display: grid; grid-template-columns: 1.3fr 0.7fr 0.7fr; gap: 10px; padding: 14px 18px 10px; }
+        .comp-box { background: #f3f6fa; border-radius: 10px; padding: 10px 12px; }
+        .comp-label { font-size: 8.5px; letter-spacing: 1.4px; color: #5a6b80; }
+        .comp-destino { font-size: 24px; font-weight: 800; color: #0d3b6b; line-height: 1.1; }
+        .comp-end { font-size: 10.5px; color: #333; margin-top: 2px; }
+        .comp-valor-g { font-size: 22px; font-weight: 800; }
+        .comp-valor-m { font-size: 17px; font-weight: 800; }
+        .comp-notas { padding: 4px 18px 12px; }
+        .comp-rodape { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px 18px; border-top: 1px solid #e3e8ef; font-size: 11px; }
+        .comp-assin { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+        .comp-ass-box { border: 1px solid #cfd6e0; border-radius: 10px; padding: 7px 8px 8px; min-height: 170px; display: flex; flex-direction: column; break-inside: avoid; }
+        .comp-ass-titulo { font-size: 9.5px; font-weight: 700; text-align: center; color: #0d3b6b; text-transform: uppercase; }
+        .comp-linha { flex: 1; border-bottom: 1.5px solid #222; margin: 0 6px; min-height: 110px; }
+        .comp-cap { font-size: 8px; text-align: center; margin-top: 4px; color: #444; text-transform: uppercase; line-height: 1.25; }
+        .comp-datas { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 0 8px; font-size: 13px; }
+        .comp-obs { margin-top: 10px; font-size: 10.5px; }
+        .comp-orient { margin-top: 10px; font-size: 9px; line-height: 1.45; color: #333; }
       `}</style>
     </div>
   );
