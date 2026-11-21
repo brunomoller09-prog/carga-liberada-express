@@ -90,9 +90,22 @@ function LiberacaoCarga() {
   const isTerceiro = destino === "TERCEIRO";
 
   // O que ainda falta para poder finalizar (mostrado no painel lateral).
+  // Placa completa = 7 letras/números (ABC1D23 ou ABC1234), sem contar o hífen.
+  const placaOk = (p: string) => p.replace(/[^A-Z0-9]/g, "").length === 7;
+  const veiculoOk = placaOk(placaCavalo) && placaOk(placaBau) && !!motorista.trim() && !!transportadora.trim();
+  const cargaOk = Number(paletes) > 0 && !!lacre1.trim() && !!conferente.trim();
+
+  // TODOS os campos são obrigatórios. Esta lista aparece no painel lateral
+  // e o botão Finalizar só libera quando tudo estiver preenchido.
   const pendencias = [
     { ok: !!destino && !!endereco.trim(), texto: isTerceiro && !endereco.trim() ? "Endereço do terceiro" : "Destino" },
     { ok: cbs.length > 0, texto: "Pelo menos uma nota fiscal" },
+    { ok: placaOk(placaCavalo), texto: "Placa do cavalo" },
+    { ok: placaOk(placaBau), texto: "Placa do baú" },
+    { ok: !!motorista.trim(), texto: "Motorista" },
+    { ok: !!transportadora.trim(), texto: "Transportadora" },
+    { ok: Number(paletes) > 0, texto: "Paletes" },
+    { ok: !!lacre1.trim(), texto: "Lacre" },
     { ok: !!conferente.trim(), texto: "Conferente" },
   ];
   const podeFinalizar = pendencias.every((p) => p.ok);
@@ -137,7 +150,7 @@ function LiberacaoCarga() {
     e.preventDefault();
     setErro(null);
     if (!podeFinalizar) {
-      setErro("Preencha os itens pendentes antes de finalizar.");
+      setErro("Todos os campos são obrigatórios. Preencha os itens pendentes.");
       return;
     }
 
@@ -220,6 +233,7 @@ function LiberacaoCarga() {
         ) : (
           <form onSubmit={finalizar} className="no-print grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
             <div className="lb-folha">
+              <p className="lb-todos-obrig">Todos os campos são obrigatórios.</p>
               <Etapa numero={1} titulo="Destino" concluida={pendencias[0].ok}>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" role="group" aria-label="Destino da carga">
                   {DESTINOS.map((d) => (
@@ -288,7 +302,7 @@ function LiberacaoCarga() {
                 )}
               </Etapa>
 
-              <Etapa numero={3} titulo="Veículo e motorista" concluida={!!placaCavalo && !!motorista}>
+              <Etapa numero={3} titulo="Veículo e motorista" concluida={veiculoOk}>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Campo rotulo="Placa do cavalo">
                     <input value={placaCavalo} onChange={(e) => setPlacaCavalo(formatarPlaca(e.target.value))}
@@ -307,7 +321,7 @@ function LiberacaoCarga() {
                 </div>
               </Etapa>
 
-              <Etapa numero={4} titulo="Carga e conferência" concluida={pendencias[2].ok} ultima>
+              <Etapa numero={4} titulo="Carga e conferência" concluida={cargaOk} ultima>
                 <div className="grid gap-4 sm:grid-cols-3">
                   <Campo rotulo="Paletes">
                     <Contador valor={paletes} onChange={setPaletes} />
@@ -315,7 +329,7 @@ function LiberacaoCarga() {
                   <Campo rotulo="Lacre">
                     <input value={lacre1} onChange={(e) => setLacre1(e.target.value)} className="lb-input" inputMode="numeric" autoComplete="off" />
                   </Campo>
-                  <Campo rotulo="Conferente" obrigatorio>
+                  <Campo rotulo="Conferente">
                     <input value={conferente} onChange={(e) => setConferente(e.target.value)} className="lb-input" autoComplete="name" />
                   </Campo>
                 </div>
@@ -675,6 +689,7 @@ const ESTILOS = `
 
 .lb-rotulo { display: block; font-size: 13px; font-weight: 600; color: var(--cinza); margin-bottom: 6px; }
 .lb-obrig { font-weight: 400; }
+.lb-todos-obrig { padding-top: 16px; font-size: 13px; color: var(--cinza); }
 .lb-input { width: 100%; height: 44px; border: 1.5px solid var(--linha); border-radius: 8px; background: #fff; padding: 0 12px; font-size: 15px; color: var(--tinta); transition: border-color .15s; }
 .lb-input:hover { border-color: #B8C5D3; }
 .lb-input:focus { border-color: var(--azul); outline: none; box-shadow: 0 0 0 3px rgba(13,59,107,.14); }
