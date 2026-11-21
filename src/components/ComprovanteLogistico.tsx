@@ -26,8 +26,9 @@ export function ComprovanteLogistico({ registro }: { registro: ComprovanteData }
     { nf: registro.nf3, serie: registro.serie3 },
     ...(registro.notasExtras ?? []),
   ].filter((n) => n.nf);
-  // Sempre mostra pelo menos 3 linhas; se tiver mais notas, a tabela cresce.
-  const linhasNotas = Array.from({ length: Math.max(3, notas.length) }, (_, i) => i);
+  // Layout das notas: 1 coluna (até 5), 2 colunas (6–14), 3 colunas (15+).
+  const colunasNotas = notas.length > 14 ? 3 : notas.length > 5 ? 2 : 1;
+  const linhasPorColuna = Math.max(1, Math.ceil(notas.length / colunasNotas));
   const lacres = [registro.lacre1].filter(Boolean);
 
   return (
@@ -77,19 +78,27 @@ export function ComprovanteLogistico({ registro }: { registro: ComprovanteData }
             </td>
             <td colSpan={5} className="align-top p-0">
               <div className="border-b border-black px-2 py-1"><strong>NOTA FISCAL – SÉRIE</strong></div>
-              <table className="w-full border-collapse">
-                <tbody>
-                  {linhasNotas.map((i) => {
-                    const n = notas[i];
-                    return (
-                      <tr key={i}>
-                        <td className="w-1/2 border-t border-black px-2 py-1">{n?.nf || "\u00A0"}</td>
-                        <td className="w-1/2 border-t border-l border-black px-2 py-1">{n?.serie || "\u00A0"}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              {/* Lista de notas SEM tabela/quadrados. Até 5 notas: uma coluna.
+                  6 a 14: duas colunas lado a lado. 15 ou mais: três colunas.
+                  A fonte diminui conforme aumenta a quantidade, para a folha
+                  não crescer demais. */}
+              <div
+                className="grid gap-x-4 gap-y-0.5 px-2 py-1.5"
+                style={{
+                  gridTemplateColumns: `repeat(${colunasNotas}, minmax(0, 1fr))`,
+                  gridAutoFlow: "column",
+                  gridTemplateRows: `repeat(${linhasPorColuna}, auto)`,
+                  fontSize: notas.length > 14 ? "9px" : notas.length > 5 ? "10px" : "11px",
+                  minHeight: notas.length <= 3 ? "3.6em" : undefined,
+                }}
+              >
+                {notas.map((n, i) => (
+                  <div key={i} className="whitespace-nowrap">
+                    <span className="font-semibold">{n.nf}</span>
+                    <span className="text-black/60"> – Série {n.serie || "—"}</span>
+                  </div>
+                ))}
+              </div>
             </td>
           </tr>
 
