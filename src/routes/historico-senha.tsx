@@ -1,7 +1,7 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { unlockHistorico } from "@/lib/gate.functions";
+import { isHistoricoUnlocked, unlockHistorico } from "@/lib/gate.functions";
 import logoAsset from "@/assets/logo-liberacao-carga.png.asset.json";
 
 // Esta é a TELA DE LOGIN do histórico (a página que pede a senha
@@ -9,6 +9,11 @@ import logoAsset from "@/assets/logo-liberacao-carga.png.asset.json";
 // "/historico-senha" — ela é sempre a primeira parada antes de
 // "/historico" em si.
 export const Route = createFileRoute("/historico-senha")({
+  // Se já está desbloqueado, pula direto para o histórico.
+  beforeLoad: async () => {
+    const { unlocked } = await isHistoricoUnlocked();
+    if (unlocked) throw redirect({ to: "/historico" });
+  },
   component: SenhaPage,
     // Configura o <title> da aba do navegador e as meta-tags usadas
   // por buscadores e por prévias de link (WhatsApp, etc.).
