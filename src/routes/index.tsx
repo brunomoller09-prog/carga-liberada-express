@@ -330,33 +330,7 @@ function LiberacaoCarga() {
           </div>
         )}
 
-        {registro && (
-          <div className="no-print mb-6 rounded-md border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            ✅ Liberação de carga registrada com sucesso!<br />
-            O documento foi gerado e pode ser impresso ou salvo em PDF.
-          </div>
-        )}
-
-        {registro && (
-          <ComprovanteLogistico registro={registro} />
-        )}
-
-        {registro && (
-          <div className="no-print mt-4 flex flex-wrap gap-3">
-            <button
-              onClick={() => window.print()}
-              className="rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow hover:opacity-90"
-            >
-              Imprimir / Salvar PDF
-            </button>
-            <button
-              onClick={limpar}
-              className="rounded-md border border-border bg-white px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-accent"
-            >
-              Nova Liberação
-            </button>
-          </div>
-        )}
+        {registro && <TelaSucesso registro={registro} onNova={limpar} />}
 
         {!registro && (
           <form onSubmit={finalizar} className="no-print space-y-6">
@@ -481,6 +455,97 @@ function LiberacaoCarga() {
         }
         .input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 2px oklch(0.35 0.09 250 / 0.15); }
       `}</style>
+    </div>
+  );
+}
+
+// Tela exibida depois de gerar a liberação: confirmação, resumo rápido,
+// ações (imprimir / nova liberação) e a pré-visualização do comprovante.
+// O comprovante em si (ComprovanteLogistico) NÃO foi alterado: é o
+// formulário oficial LG-SC.FO.030 e precisa sair igual no papel.
+function TelaSucesso({ registro, onNova }: { registro: Registro; onNova: () => void }) {
+  const [copiado, setCopiado] = useState(false);
+  const totalNotas =
+    [registro.nf1, registro.nf2, registro.nf3].filter(Boolean).length + (registro.notasExtras?.length ?? 0);
+
+  async function copiarId() {
+    try {
+      await navigator.clipboard.writeText(registro.idCarga);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    } catch {
+      /* sem permissão de área de transferência: ignora */
+    }
+  }
+
+  const itens: { rotulo: string; valor: string }[] = [
+    { rotulo: "Destino", valor: registro.destino },
+    { rotulo: "Notas fiscais", valor: String(totalNotas) },
+    { rotulo: "Paletes", valor: registro.paletes || "—" },
+    { rotulo: "Motorista", valor: registro.motorista || "—" },
+    { rotulo: "Placa cavalo", valor: registro.placaCavalo || "—" },
+    { rotulo: "Lacre", valor: registro.lacre1 || "—" },
+  ];
+
+  return (
+    <div>
+      <div className="no-print overflow-hidden rounded-xl border border-emerald-200 bg-white shadow-md">
+        <div className="flex flex-col gap-4 bg-gradient-to-r from-emerald-600 to-emerald-500 px-6 py-6 text-white sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/20 text-2xl">✓</span>
+            <div>
+              <p className="text-lg font-bold leading-tight">Liberação registrada com sucesso</p>
+              <p className="text-sm opacity-90">{registro.data} às {registro.hora} · Conferente: {registro.conferente}</p>
+            </div>
+          </div>
+          <div className="rounded-lg bg-black/25 px-4 py-2 text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-widest opacity-80">ID da carga</p>
+            <p className="font-mono text-lg font-bold tracking-wide">{registro.idCarga}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-px bg-border sm:grid-cols-3 lg:grid-cols-6">
+          {itens.map((i) => (
+            <div key={i.rotulo} className="bg-white px-4 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{i.rotulo}</p>
+              <p className="truncate text-sm font-semibold text-foreground" title={i.valor}>{i.valor}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 border-t border-border bg-muted/40 px-6 py-4">
+          <button
+            onClick={() => window.print()}
+            className="rounded-md bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow hover:opacity-90"
+          >
+            🖨️ Imprimir / Salvar PDF
+          </button>
+          <button
+            onClick={onNova}
+            className="rounded-md border border-border bg-white px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-accent"
+          >
+            + Nova liberação
+          </button>
+          <button
+            onClick={copiarId}
+            className="rounded-md border border-border bg-white px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-accent"
+          >
+            {copiado ? "✓ ID copiado" : "Copiar ID"}
+          </button>
+          <p className="w-full text-xs text-muted-foreground sm:ml-auto sm:w-auto">
+            Imprima e anexe as NFs ao comprovante antes de liberar o veículo.
+          </p>
+        </div>
+      </div>
+
+      <p className="no-print mb-2 mt-8 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        Pré-visualização do comprovante
+      </p>
+      <div className="no-print-frame overflow-x-auto rounded-xl border border-border bg-muted p-3 shadow-inner sm:p-6">
+        <div className="mx-auto max-w-[900px] bg-white shadow-lg ring-1 ring-black/10">
+          <ComprovanteLogistico registro={registro} />
+        </div>
+      </div>
     </div>
   );
 }
